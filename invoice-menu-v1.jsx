@@ -1,8 +1,10 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { 
-  ArrowLeft, 
+  AlertCircle,
   Search, 
   Bell, 
+  Camera,
+  CheckCircle2,
   Menu, 
   Calendar, 
   ChevronDown, 
@@ -10,6 +12,7 @@ import {
   Edit3, 
   Save, 
   X, 
+  FileText,
   Eye,
   EyeOff,
   Minimize2,
@@ -41,6 +44,51 @@ const INVOICE_IMAGE_DATA = {
     src: '/invoices/invoice-b.jpg',
     fileName: 'invoice-b.jpg',
     pageLabel: 'Page 2/2'
+  }
+};
+
+const INITIAL_NOTIFICATIONS = [
+  {
+    id: 1,
+    type: 'review',
+    title: '검수 필요',
+    description: '비타민하우스 | 2026-001 · 1건',
+    time: '방금',
+    unread: true
+  },
+  {
+    id: 2,
+    type: 'ocr',
+    title: 'OCR 완료',
+    description: '(주)녹십자 | 2026-002 · 3건',
+    time: '5분 전',
+    unread: true
+  },
+  {
+    id: 3,
+    type: 'completed',
+    title: '검수 완료',
+    description: '비타민하우스 | 2026-001',
+    time: '1시간 전',
+    unread: false
+  }
+];
+
+const NOTIFICATION_META = {
+  review: {
+    icon: AlertCircle,
+    badgeClass: 'bg-amber-50 border border-amber-200',
+    iconClass: 'text-amber-600'
+  },
+  ocr: {
+    icon: FileText,
+    badgeClass: 'bg-blue-50 border border-blue-200',
+    iconClass: 'text-blue-600'
+  },
+  completed: {
+    icon: CheckCircle2,
+    badgeClass: 'bg-green-50 border border-green-200',
+    iconClass: 'text-green-600'
   }
 };
 
@@ -145,6 +193,11 @@ export default function PharmxAIApp() {
   const [editViewMode, setEditViewMode] = useState('A');
   const [isEditImageVisible, setIsEditImageVisible] = useState(true);
   const [isEditImageCollapsed, setIsEditImageCollapsed] = useState(false);
+  const [isCameraFlowOpen, setIsCameraFlowOpen] = useState(false);
+  const [isNotiOpen, setIsNotiOpen] = useState(false);
+  const [notiTab, setNotiTab] = useState('all');
+  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   // Refs for Scroll Spy
   const listContainerRef = useRef(null);
@@ -196,6 +249,29 @@ export default function PharmxAIApp() {
     setEditForm(prev => ({ ...prev, [field]: value }));
   };
 
+  const openCameraFlow = () => {
+    setIsCameraFlowOpen(true);
+    setIsNotiOpen(false);
+    setIsMenuOpen(false);
+  };
+  const closeCameraFlow = () => setIsCameraFlowOpen(false);
+
+  const toggleNotiPanel = () => {
+    setIsNotiOpen(prev => !prev);
+    setIsMenuOpen(false);
+  };
+  const closeNotiPanel = () => setIsNotiOpen(false);
+  const markAllNotificationsRead = () =>
+    setNotifications(prev => prev.map(item => ({ ...item, unread: false })));
+  const markNotificationRead = (id) =>
+    setNotifications(prev => prev.map(item => item.id === id ? { ...item, unread: false } : item));
+
+  const toggleMenuPanel = () => {
+    setIsMenuOpen(prev => !prev);
+    setIsNotiOpen(false);
+  };
+  const closeMenuPanel = () => setIsMenuOpen(false);
+
   // Group items
   const invoiceAGroup = items.filter(i => i.invoiceId === INVOICE_A_ID);
   const invoiceBGroup = items.filter(i => i.invoiceId === INVOICE_B_ID);
@@ -205,19 +281,48 @@ export default function PharmxAIApp() {
     return group.reduce((acc, item) => acc + (item.qty * item.price), 0);
   };
 
+  const unreadCount = notifications.filter(item => item.unread).length;
+  const visibleNotifications = notifications.filter(item => 
+    notiTab === 'unread' ? item.unread : true
+  );
+
   return (
     <div className="flex flex-col h-screen bg-gray-100 font-sans max-w-md mx-auto shadow-2xl overflow-hidden border-x border-gray-200">
       
       {/* 1. Global Header */}
       <header className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-200 z-50 shadow-sm shrink-0">
         <div className="flex items-center gap-2">
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
           <h1 className="text-lg font-bold text-blue-900 tracking-tight">PharmxAI</h1>
         </div>
         <div className="flex gap-4">
+          <button
+            type="button"
+            onClick={openCameraFlow}
+            aria-label="거래명세서 촬영"
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <Camera className="w-5 h-5" />
+          </button>
           <Search className="w-5 h-5 text-gray-500" />
-          <Bell className="w-5 h-5 text-gray-500" />
-          <Menu className="w-5 h-5 text-gray-500" />
+          <button
+            type="button"
+            onClick={toggleNotiPanel}
+            aria-label="알림"
+            className="relative text-gray-500 hover:text-gray-700"
+          >
+            <Bell className="w-5 h-5" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-red-500"></span>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={toggleMenuPanel}
+            aria-label="메뉴"
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
         </div>
       </header>
 
@@ -319,6 +424,164 @@ export default function PharmxAIApp() {
         )}
 
       </div>
+
+      {isMenuOpen && (
+        <div 
+          className="fixed inset-0 z-[55] bg-black/20"
+          onClick={closeMenuPanel}
+        >
+          <div className="mx-auto flex h-full max-w-md items-start justify-end px-4 pt-16">
+            <div 
+              className="w-48 rounded-2xl border border-gray-200 bg-white p-2 shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {['대시보드', '거래명세서', '공급사', '유효기간'].map((label) => (
+                <button
+                  key={label}
+                  type="button"
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isNotiOpen && (
+        <div 
+          className="fixed inset-0 z-[55] bg-black/30"
+          onClick={closeNotiPanel}
+        >
+          <div className="mx-auto flex h-full max-w-md items-start px-4 pt-16">
+            <div 
+              className="w-full rounded-2xl border border-gray-200 bg-white shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between border-b border-gray-100 px-4 py-3">
+                <div>
+                  <p className="text-sm font-bold text-gray-900">알림</p>
+                  <p className="text-[10px] text-gray-400">미확인 {unreadCount}건</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={markAllNotificationsRead}
+                    disabled={unreadCount === 0}
+                    className="rounded-full border border-gray-200 px-3 py-1 text-[10px] font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-default disabled:opacity-40"
+                  >
+                    모두 읽음
+                  </button>
+                  <button
+                    type="button"
+                    onClick={closeNotiPanel}
+                    className="rounded-full border border-gray-200 px-3 py-1 text-[10px] font-semibold text-gray-600 hover:bg-gray-50"
+                  >
+                    닫기
+                  </button>
+                </div>
+              </div>
+
+              <div className="px-4 py-2">
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setNotiTab('all')}
+                    className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+                      notiTab === 'all'
+                        ? 'border-blue-200 bg-blue-50 text-blue-600'
+                        : 'border-gray-200 bg-white text-gray-500'
+                    }`}
+                  >
+                    전체
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNotiTab('unread')}
+                    className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+                      notiTab === 'unread'
+                        ? 'border-blue-200 bg-blue-50 text-blue-600'
+                        : 'border-gray-200 bg-white text-gray-500'
+                    }`}
+                  >
+                    미확인
+                  </button>
+                </div>
+              </div>
+
+              <div className="max-h-[60vh] divide-y divide-gray-100 overflow-y-auto">
+                {visibleNotifications.length === 0 ? (
+                  <div className="px-4 py-10 text-center text-xs text-gray-400">
+                    새 알림이 없습니다.
+                  </div>
+                ) : (
+                  visibleNotifications.map((item) => {
+                    const meta = NOTIFICATION_META[item.type] || {
+                      icon: Bell,
+                      badgeClass: 'bg-gray-100 border border-gray-200',
+                      iconClass: 'text-gray-500'
+                    };
+                    const Icon = meta.icon;
+
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => markNotificationRead(item.id)}
+                        className={`w-full px-4 py-3 text-left transition-colors ${
+                          item.unread ? 'bg-blue-50/40' : 'bg-white'
+                        } hover:bg-gray-50`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-full ${meta.badgeClass}`}>
+                            <Icon className={`h-4 w-4 ${meta.iconClass}`} />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-semibold text-gray-800">{item.title}</span>
+                              {item.unread && (
+                                <span className="text-[10px] font-semibold text-blue-600">NEW</span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-gray-500">{item.description}</p>
+                          </div>
+                          <span className="text-[10px] text-gray-400">{item.time}</span>
+                        </div>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isCameraFlowOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                <Camera className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-900">거래명세서 촬영</p>
+                <p className="text-xs text-gray-500">촬영 플로우는 준비 중입니다.</p>
+              </div>
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={closeCameraFlow}
+                className="rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
