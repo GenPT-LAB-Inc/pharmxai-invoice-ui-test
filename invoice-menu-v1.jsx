@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { 
   ArrowLeft, 
   Search, 
@@ -142,9 +142,8 @@ export default function PharmxAIApp() {
   // Determine height class based on state
   const imageContainerHeightClass = useMemo(() => {
     if (!isImageViewVisible) return 'h-0 border-b-0'; 
-    if (isEditing) return 'h-[20%] border-b border-gray-400'; 
     return 'h-[45%] border-b border-gray-400'; 
-  }, [isImageViewVisible, isEditing]);
+  }, [isImageViewVisible]);
 
   // Scroll Handler
   const handleScroll = () => {
@@ -273,14 +272,9 @@ export default function PharmxAIApp() {
             hasSeparateTax={INVOICE_META[INVOICE_A_ID].hasSeparateTax}
             items={invoiceAGroup}
             isEditing={isEditing}
-            editingId={editingId}
-            editForm={editForm}
             isImageVisible={isImageViewVisible}
             onToggleImage={() => setIsImageViewVisible(!isImageViewVisible)}
             onStartEdit={startEditing}
-            onCancelEdit={cancelEditing}
-            onSaveEdit={saveEditing}
-            onChange={handleInputChange}
           />
 
           {/* Invoice B Section */}
@@ -294,14 +288,9 @@ export default function PharmxAIApp() {
               hasSeparateTax={INVOICE_META[INVOICE_B_ID].hasSeparateTax}
               items={invoiceBGroup}
               isEditing={isEditing}
-              editingId={editingId}
-              editForm={editForm}
               isImageVisible={isImageViewVisible}
               onToggleImage={() => setIsImageViewVisible(!isImageViewVisible)}
               onStartEdit={startEditing}
-              onCancelEdit={cancelEditing}
-              onSaveEdit={saveEditing}
-              onChange={handleInputChange}
             />
           </div>
 
@@ -309,22 +298,13 @@ export default function PharmxAIApp() {
           <div className={`transition-all duration-300 ${isEditing ? 'h-[350px]' : 'h-24'}`}></div>
         </div>
 
-        {/* 4. Bottom Sticky Action Bar */}
         {isEditing && (
-          <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 shadow-lg z-50 flex gap-2 animate-slide-up">
-            <button 
-              onClick={cancelEditing}
-              className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-lg flex items-center justify-center gap-2"
-            >
-              <X className="w-4 h-4" /> 취소
-            </button>
-            <button 
-              onClick={saveEditing}
-              className="flex-[2] py-3 bg-blue-600 text-white font-bold rounded-lg flex items-center justify-center gap-2 shadow-blue-200 shadow-md"
-            >
-              <Save className="w-4 h-4" /> 저장 완료
-            </button>
-          </div>
+          <EditOverlay 
+            data={editForm}
+            onChange={handleInputChange}
+            onCancel={cancelEditing}
+            onSave={saveEditing}
+          />
         )}
 
       </div>
@@ -342,14 +322,9 @@ function InvoiceSection({
   hasSeparateTax,
   items, 
   isEditing, 
-  editingId, 
-  editForm, 
   isImageVisible, 
   onToggleImage,
-  onStartEdit, 
-  onCancelEdit, 
-  onSaveEdit, 
-  onChange 
+  onStartEdit
 }) {
   
   const getStatusBadge = (status) => {
@@ -409,28 +384,29 @@ function InvoiceSection({
 
       {/* Items List */}
       <div className="bg-white divide-y divide-gray-100">
-        {items.map((item) => {
-          const isItemEditing = editingId === item.id;
-          
-          if (isItemEditing) {
-            return (
-              <EditItem 
-                key={item.id} 
-                data={editForm} 
-                onChange={onChange}
-              />
-            );
-          }
-          
-          return (
-            <ViewItem 
-              key={item.id} 
-              data={item} 
-              onEdit={() => onStartEdit(item)} 
-              disabled={isEditing && !isItemEditing} 
-            />
-          );
-        })}
+        {items.map((item) => (
+          <ViewItem 
+            key={item.id} 
+            data={item} 
+            onEdit={() => onStartEdit(item)} 
+            disabled={isEditing}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function EditOverlay({ data, onChange, onCancel, onSave }) {
+  return (
+    <div className="absolute inset-0 z-50 bg-white">
+      <div className="h-full overflow-y-auto bg-gray-50">
+        <EditItem 
+          data={data} 
+          onChange={onChange} 
+          onCancel={onCancel}
+          onSave={onSave}
+        />
       </div>
     </div>
   );
@@ -500,20 +476,9 @@ function ViewItem({ data, onEdit, disabled }) {
 }
 
 // --- Edit Mode Item ---
-function EditItem({ data, onChange }) {
-  const itemRef = useRef(null);
-  
+function EditItem({ data, onChange, onCancel, onSave }) {
   // Simple auto-calculation for display
   const total = data.qty * data.price;
-
-  // 1. Auto-scroll on mount (Enter edit mode)
-  useEffect(() => {
-    if (itemRef.current) {
-      setTimeout(() => {
-        itemRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 300); // 300ms delay to allow UI transition (image shrinking) to finish
-    }
-  }, []);
 
   // 2. Focus Handler to scroll input into view (when keyboard pops up)
   const handleFocus = (e) => {
@@ -523,9 +488,25 @@ function EditItem({ data, onChange }) {
   };
 
   return (
-    <div ref={itemRef} className="p-4 bg-blue-50/50 border-l-4 border-blue-600 animate-fade-in scroll-mt-32">
-      <div className="flex justify-between items-center mb-3">
+    <div className="p-4 bg-blue-50/50 border-l-4 border-blue-600 animate-fade-in scroll-mt-32">
+      <div className="flex justify-between items-center mb-3 sticky top-0 z-10 bg-blue-50/95 py-2">
         <h3 className="text-sm font-bold text-gray-800 truncate pr-2">{data.name}</h3>
+        <div className="flex gap-2">
+          <button 
+            onClick={onCancel}
+            className="px-3 py-1 text-xs font-semibold text-gray-700 bg-white border border-gray-200 rounded-full shadow-sm"
+          >
+            <X className="w-3 h-3 inline-block -mt-0.5 mr-1" />
+            취소
+          </button>
+          <button 
+            onClick={onSave}
+            className="px-3 py-1 text-xs font-semibold text-white bg-blue-600 rounded-full shadow-sm"
+          >
+            <Save className="w-3 h-3 inline-block -mt-0.5 mr-1" />
+            저장 완료
+          </button>
+        </div>
       </div>
 
       {/* Inputs */}
