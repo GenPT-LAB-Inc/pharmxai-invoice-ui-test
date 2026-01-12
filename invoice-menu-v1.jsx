@@ -12,7 +12,6 @@ import {
   Edit3, 
   Save, 
   X, 
-  RefreshCw,
   Image as ImageIcon,
   Eye,
   EyeOff,
@@ -40,13 +39,13 @@ const INITIAL_DATA = [
   {
     id: 1,
     invoiceId: INVOICE_A_ID,
-    invoiceName: '(주)디알에스 | 2026-001',
+    invoiceName: '비타민하우스 | 2026-001',
     status: 'completed',
-    name: '낙산균(Naksan)(수출용)',
-    standard: '60C',
-    qty: 2,
-    price: 40000, 
-    lot: '',
+    name: '단쇄지방산 SCFA455',
+    standard: '1,200mgX90정',
+    qty: 5,
+    price: 28000, 
+    lot: 'A203947',
     expiry: '2027-03-12',
     note: '',
     isLotMissing: true
@@ -54,26 +53,26 @@ const INITIAL_DATA = [
   {
     id: 2,
     invoiceId: INVOICE_A_ID,
-    invoiceName: '(주)디알에스 | 2026-001',
+    invoiceName: '비타민하우스 | 2026-001',
     status: 'completed',
-    name: '[DRS] 초임계 rTG오메가3 POLAR',
-    standard: '30C x 2',
-    qty: 10,
-    price: 40000,
+    name: '미라클 프로젝트 NMN250',
+    standard: '1,000mgX30정',
+    qty: 5,
+    price: 21000,
     lot: 'A203948',
     expiry: '2028-05-06',
-    note: '행사상품',
+    note: '',
     isLotMissing: false
   },
   {
     id: 3,
     invoiceId: INVOICE_A_ID,
-    invoiceName: '(주)디알에스 | 2026-001',
+    invoiceName: '비타민하우스 | 2026-001',
     status: 'completed',
-    name: '루테인 지아잔틴 164',
-    standard: '30C',
+    name: '위UP로 가는 SOD효소',
+    standard: '2gX30포(60g)',
     qty: 5,
-    price: 13750,
+    price: 10500,
     lot: 'B102938',
     expiry: '2027-11-20',
     note: '',
@@ -267,7 +266,7 @@ export default function PharmxAIApp() {
           {/* Invoice A Section */}
           <InvoiceSection 
             invoiceId={INVOICE_A_ID}
-            title="(주)디알에스 | 2026-001" 
+            title="비타민하우스 | 2026-001" 
             status="completed" 
             totalAmount={getInvoiceTotal(invoiceAGroup)}
             taxAmount={INVOICE_META[INVOICE_A_ID].taxAmount}
@@ -311,7 +310,7 @@ export default function PharmxAIApp() {
         </div>
 
         {/* 4. Bottom Sticky Action Bar */}
-        {isEditing ? (
+        {isEditing && (
           <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 shadow-lg z-50 flex gap-2 animate-slide-up">
             <button 
               onClick={cancelEditing}
@@ -325,15 +324,6 @@ export default function PharmxAIApp() {
             >
               <Save className="w-4 h-4" /> 저장 완료
             </button>
-          </div>
-        ) : (
-          <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3 z-40">
-             <button className="bg-white text-gray-700 border border-gray-300 px-6 py-2.5 rounded-full shadow-lg font-bold text-sm hover:bg-gray-50 flex items-center gap-2">
-               <Save className="w-4 h-4" /> 임시저장
-             </button>
-             <button className="bg-green-600 text-white px-8 py-2.5 rounded-full shadow-lg font-bold text-sm hover:bg-green-700 shadow-green-200 flex items-center gap-2">
-               <CheckCircle2 className="w-4 h-4" /> 검수 완료
-             </button>
           </div>
         )}
 
@@ -412,7 +402,7 @@ function InvoiceSection({
             onClick={onToggleImage}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors border ${isImageVisible ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-gray-50 border-gray-200 text-gray-400'}`}
           >
-            {isImageVisible ? <><Eye className="w-3 h-3" /> 이미지 ON</> : <><EyeOff className="w-3 h-3" /> 이미지 OFF</>}
+            {isImageVisible ? <><Eye className="w-3 h-3" /> 거래명세서 보기 ON</> : <><EyeOff className="w-3 h-3" /> 거래명세서 보기 OFF</>}
           </button>
         </div>
       </div>
@@ -536,9 +526,6 @@ function EditItem({ data, onChange }) {
     <div ref={itemRef} className="p-4 bg-blue-50/50 border-l-4 border-blue-600 animate-fade-in scroll-mt-32">
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-sm font-bold text-gray-800 truncate pr-2">{data.name}</h3>
-        <button className="text-[10px] flex items-center gap-1 bg-white border border-gray-200 px-2 py-1 rounded text-gray-600 shadow-sm">
-          <RefreshCw className="w-3 h-3" /> OCR 재인식
-        </button>
       </div>
 
       {/* Inputs */}
