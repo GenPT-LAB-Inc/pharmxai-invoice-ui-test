@@ -10,7 +10,6 @@ import {
   Edit3, 
   Save, 
   X, 
-  Image as ImageIcon,
   Eye,
   EyeOff,
   Minimize2,
@@ -29,6 +28,19 @@ const INVOICE_META = {
   [INVOICE_B_ID]: {
     hasSeparateTax: false, // 세액 미표기/면세 등
     taxAmount: 0
+  }
+};
+
+const INVOICE_IMAGE_DATA = {
+  [INVOICE_A_ID]: {
+    src: '/invoices/invoice-a.png',
+    fileName: 'invoice-a.png',
+    pageLabel: 'Page 1/2'
+  },
+  [INVOICE_B_ID]: {
+    src: '/invoices/invoice-b.jpg',
+    fileName: 'invoice-b.jpg',
+    pageLabel: 'Page 2/2'
   }
 };
 
@@ -121,6 +133,8 @@ const INITIAL_DATA = [
 
 // --- Helper Functions ---
 const formatCurrency = (val) => new Intl.NumberFormat('ko-KR').format(Math.round(val));
+const getInvoiceImageData = (invoiceId) =>
+  INVOICE_IMAGE_DATA[invoiceId] || INVOICE_IMAGE_DATA[INVOICE_A_ID];
 
 export default function PharmxAIApp() {
   const [items, setItems] = useState(INITIAL_DATA);
@@ -138,6 +152,7 @@ export default function PharmxAIApp() {
 
   // Computed Values
   const isEditing = editingId !== null;
+  const activeImageData = getInvoiceImageData(activeInvoiceId);
   
   // Determine height class based on state
   const imageContainerHeightClass = useMemo(() => {
@@ -226,22 +241,13 @@ export default function PharmxAIApp() {
           className={`bg-slate-800 w-full relative transition-all duration-500 ease-in-out shrink-0 overflow-hidden flex items-center justify-center
             ${imageContainerHeightClass}`}
         >
-          <div className="absolute inset-0 opacity-40 bg-[url('https://www.transparenttextures.com/patterns/graphy.png')]"></div>
-          
-          <div className="relative z-10 text-center text-white/90">
-             <div className="mb-2 flex justify-center">
-                <ImageIcon className="w-8 h-8 opacity-50" />
-             </div>
-             <p className="text-sm font-medium">원본 거래명세서 이미지</p>
-             <p className="text-xs text-white/60 mt-1">
-               {activeInvoiceId === INVOICE_A_ID ? '파일명: 20260106_DRS_001.jpg' : '파일명: 20260106_GC_002.jpg'}
-             </p>
-             <div className="mt-4 px-3 py-1 bg-black/30 rounded-full text-xs inline-flex items-center gap-2 backdrop-blur-sm">
-                <span>🔍 핀치 줌 가능</span>
-                <span className="w-px h-3 bg-white/20"></span>
-                <span>{activeInvoiceId === INVOICE_A_ID ? 'Page 1/2' : 'Page 2/2'}</span>
-             </div>
-          </div>
+          <img
+            src={activeImageData.src}
+            alt="거래명세서 이미지"
+            className="absolute inset-0 h-full w-full object-contain"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20"></div>
           
           {!isEditing && isImageViewVisible && (
             <button 
@@ -252,10 +258,6 @@ export default function PharmxAIApp() {
               <Minimize2 className="w-4 h-4" />
             </button>
           )}
-
-          <div className="absolute bottom-2 right-2 bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded shadow-lg">
-            현재 보고있는 명세서: {activeInvoiceId === INVOICE_A_ID ? 'A' : 'B'}
-          </div>
         </div>
 
         {/* B. Scrollable List Area */}
@@ -521,7 +523,7 @@ function EditOverlay({
               </div>
               {isImageVisible && (
                 <div className="absolute bottom-4 right-4 h-40 w-32 overflow-hidden rounded-xl border border-gray-300 shadow-lg">
-                  <EditImagePreview invoiceId={safeInvoiceId} compact />
+                  <EditImagePreview invoiceId={safeInvoiceId} />
                 </div>
               )}
             </div>
@@ -532,41 +534,19 @@ function EditOverlay({
   );
 }
 
-function EditImagePreview({ invoiceId, compact = false }) {
+function EditImagePreview({ invoiceId }) {
   const safeInvoiceId = invoiceId === INVOICE_B_ID ? INVOICE_B_ID : INVOICE_A_ID;
-  const isInvoiceA = safeInvoiceId === INVOICE_A_ID;
-  const fileName = isInvoiceA ? '20260106_DRS_001.jpg' : '20260106_GC_002.jpg';
-  const pageLabel = isInvoiceA ? 'Page 1/2' : 'Page 2/2';
-  const sizeClass = compact ? 'w-5 h-5' : 'w-8 h-8';
-  const iconMarginClass = compact ? 'mb-1' : 'mb-2';
-  const titleClass = compact ? 'text-[10px]' : 'text-sm';
-  const subClass = compact ? 'text-[9px]' : 'text-xs';
-  const badgeClass = compact ? 'bottom-1 right-1 text-[9px] px-1.5 py-0.5' : 'bottom-2 right-2 text-[10px] px-2 py-0.5';
+  const imageData = getInvoiceImageData(safeInvoiceId);
 
   return (
     <div className="relative h-full w-full bg-slate-800 overflow-hidden flex items-center justify-center">
-      <div className="absolute inset-0 opacity-40 bg-[url('https://www.transparenttextures.com/patterns/graphy.png')]"></div>
-      <div className="relative z-10 text-center text-white/90 px-3">
-        <div className={`${iconMarginClass} flex justify-center`}>
-          <ImageIcon className={`${sizeClass} opacity-50`} />
-        </div>
-        <p className={`${titleClass} font-medium`}>원본 거래명세서 이미지</p>
-        {!compact && (
-          <p className={`${subClass} text-white/60 mt-1`}>파일명: {fileName}</p>
-        )}
-        {compact ? (
-          <p className={`${subClass} text-white/60 mt-1`}>{pageLabel}</p>
-        ) : (
-          <div className="mt-3 px-3 py-1 bg-black/30 rounded-full text-xs inline-flex items-center gap-2 backdrop-blur-sm">
-            <span>🔍 핀치 줌 가능</span>
-            <span className="w-px h-3 bg-white/20"></span>
-            <span>{pageLabel}</span>
-          </div>
-        )}
-      </div>
-      <div className={`absolute ${badgeClass} bg-blue-600 text-white rounded shadow-lg`}>
-        현재 명세서: {isInvoiceA ? 'A' : 'B'}
-      </div>
+      <img
+        src={imageData.src}
+        alt="거래명세서 이미지"
+        className="absolute inset-0 h-full w-full object-contain"
+        loading="lazy"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20"></div>
     </div>
   );
 }
