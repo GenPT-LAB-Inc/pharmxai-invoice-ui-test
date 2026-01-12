@@ -6,8 +6,6 @@ import {
   Menu, 
   Calendar, 
   ChevronDown, 
-  CheckCircle2, 
-  AlertCircle, 
   Loader2, 
   Edit3, 
   Save, 
@@ -16,7 +14,6 @@ import {
   Eye,
   EyeOff,
   Minimize2,
-  FileText
 } from 'lucide-react';
 
 // --- Mock Data ---
@@ -131,6 +128,9 @@ export default function PharmxAIApp() {
   const [editForm, setEditForm] = useState({});
   const [activeInvoiceId, setActiveInvoiceId] = useState(INVOICE_A_ID);
   const [isImageViewVisible, setIsImageViewVisible] = useState(false);
+  const [editViewMode, setEditViewMode] = useState('A');
+  const [isEditImageVisible, setIsEditImageVisible] = useState(true);
+  const [isEditImageCollapsed, setIsEditImageCollapsed] = useState(false);
   
   // Refs for Scroll Spy
   const listContainerRef = useRef(null);
@@ -162,6 +162,8 @@ export default function PharmxAIApp() {
   const startEditing = (item) => {
     setEditingId(item.id);
     setEditForm({ ...item });
+    setIsEditImageVisible(true);
+    setIsEditImageCollapsed(false);
   };
 
   const cancelEditing = () => {
@@ -301,6 +303,13 @@ export default function PharmxAIApp() {
         {isEditing && (
           <EditOverlay 
             data={editForm}
+            invoiceId={editForm.invoiceId}
+            viewMode={editViewMode}
+            onViewModeChange={setEditViewMode}
+            isImageVisible={isEditImageVisible}
+            onToggleImage={() => setIsEditImageVisible(prev => !prev)}
+            isImageCollapsed={isEditImageCollapsed}
+            onToggleImageCollapse={() => setIsEditImageCollapsed(prev => !prev)}
             onChange={handleInputChange}
             onCancel={cancelEditing}
             onSave={saveEditing}
@@ -397,16 +406,166 @@ function InvoiceSection({
   );
 }
 
-function EditOverlay({ data, onChange, onCancel, onSave }) {
+function EditOverlay({ 
+  data, 
+  invoiceId,
+  viewMode,
+  onViewModeChange,
+  isImageVisible,
+  onToggleImage,
+  isImageCollapsed,
+  onToggleImageCollapse,
+  onChange, 
+  onCancel, 
+  onSave 
+}) {
+  const safeInvoiceId = invoiceId === INVOICE_B_ID ? INVOICE_B_ID : INVOICE_A_ID;
+  const modeButtonClass = (mode) =>
+    `px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
+      viewMode === mode ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
+    }`;
+
   return (
     <div className="absolute inset-0 z-50 bg-white">
-      <div className="h-full overflow-y-auto bg-gray-50">
-        <EditItem 
-          data={data} 
-          onChange={onChange} 
-          onCancel={onCancel}
-          onSave={onSave}
-        />
+      <div className="flex h-full flex-col">
+        <div className="shrink-0 border-b border-gray-200 bg-white/95 backdrop-blur">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-gray-500">편집 보기</span>
+              <div className="flex rounded-full border border-gray-200 bg-gray-50 p-0.5">
+                <button className={modeButtonClass('A')} onClick={() => onViewModeChange('A')}>A안</button>
+                <button className={modeButtonClass('B')} onClick={() => onViewModeChange('B')}>B안</button>
+                <button className={modeButtonClass('C')} onClick={() => onViewModeChange('C')}>C안</button>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={onToggleImage}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
+                  isImageVisible ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-gray-50 border-gray-200 text-gray-400'
+                }`}
+              >
+                {isImageVisible ? <><Eye className="w-3 h-3" /> 거래명세서 보기 ON</> : <><EyeOff className="w-3 h-3" /> 거래명세서 보기 OFF</>}
+              </button>
+              {viewMode === 'B' && isImageVisible && (
+                <button 
+                  onClick={onToggleImageCollapse}
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600"
+                >
+                  <ChevronDown className={`w-3 h-3 transition-transform ${isImageCollapsed ? '' : 'rotate-180'}`} />
+                  {isImageCollapsed ? '이미지 펼치기' : '이미지 접기'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 bg-gray-50">
+          {viewMode === 'A' && (
+            <div className="flex h-full flex-col">
+              {isImageVisible && (
+                <div className="shrink-0 h-[30%] border-b border-gray-300">
+                  <EditImagePreview invoiceId={safeInvoiceId} />
+                </div>
+              )}
+              <div className="flex-1 overflow-y-auto">
+                <EditItem 
+                  data={data} 
+                  onChange={onChange} 
+                  onCancel={onCancel}
+                  onSave={onSave}
+                />
+              </div>
+            </div>
+          )}
+
+          {viewMode === 'B' && (
+            <div className="flex h-full flex-col">
+              {isImageVisible && (
+                <div className={`shrink-0 border-b border-gray-300 transition-all duration-300 ${isImageCollapsed ? 'h-12' : 'h-[30%]'}`}>
+                  {isImageCollapsed ? (
+                    <div className="flex h-full items-center justify-between px-4">
+                      <span className="text-xs font-semibold text-gray-600">거래명세서 이미지</span>
+                      <button 
+                        onClick={onToggleImageCollapse}
+                        className="text-xs font-semibold text-blue-600"
+                      >
+                        펼치기
+                      </button>
+                    </div>
+                  ) : (
+                    <EditImagePreview invoiceId={safeInvoiceId} />
+                  )}
+                </div>
+              )}
+              <div className="flex-1 overflow-y-auto">
+                <EditItem 
+                  data={data} 
+                  onChange={onChange} 
+                  onCancel={onCancel}
+                  onSave={onSave}
+                />
+              </div>
+            </div>
+          )}
+
+          {viewMode === 'C' && (
+            <div className="relative h-full">
+              <div className="h-full overflow-y-auto pb-32 pr-28">
+                <EditItem 
+                  data={data} 
+                  onChange={onChange} 
+                  onCancel={onCancel}
+                  onSave={onSave}
+                />
+              </div>
+              {isImageVisible && (
+                <div className="absolute bottom-4 right-4 h-40 w-32 overflow-hidden rounded-xl border border-gray-300 shadow-lg">
+                  <EditImagePreview invoiceId={safeInvoiceId} compact />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EditImagePreview({ invoiceId, compact = false }) {
+  const safeInvoiceId = invoiceId === INVOICE_B_ID ? INVOICE_B_ID : INVOICE_A_ID;
+  const isInvoiceA = safeInvoiceId === INVOICE_A_ID;
+  const fileName = isInvoiceA ? '20260106_DRS_001.jpg' : '20260106_GC_002.jpg';
+  const pageLabel = isInvoiceA ? 'Page 1/2' : 'Page 2/2';
+  const sizeClass = compact ? 'w-5 h-5' : 'w-8 h-8';
+  const iconMarginClass = compact ? 'mb-1' : 'mb-2';
+  const titleClass = compact ? 'text-[10px]' : 'text-sm';
+  const subClass = compact ? 'text-[9px]' : 'text-xs';
+  const badgeClass = compact ? 'bottom-1 right-1 text-[9px] px-1.5 py-0.5' : 'bottom-2 right-2 text-[10px] px-2 py-0.5';
+
+  return (
+    <div className="relative h-full w-full bg-slate-800 overflow-hidden flex items-center justify-center">
+      <div className="absolute inset-0 opacity-40 bg-[url('https://www.transparenttextures.com/patterns/graphy.png')]"></div>
+      <div className="relative z-10 text-center text-white/90 px-3">
+        <div className={`${iconMarginClass} flex justify-center`}>
+          <ImageIcon className={`${sizeClass} opacity-50`} />
+        </div>
+        <p className={`${titleClass} font-medium`}>원본 거래명세서 이미지</p>
+        {!compact && (
+          <p className={`${subClass} text-white/60 mt-1`}>파일명: {fileName}</p>
+        )}
+        {compact ? (
+          <p className={`${subClass} text-white/60 mt-1`}>{pageLabel}</p>
+        ) : (
+          <div className="mt-3 px-3 py-1 bg-black/30 rounded-full text-xs inline-flex items-center gap-2 backdrop-blur-sm">
+            <span>🔍 핀치 줌 가능</span>
+            <span className="w-px h-3 bg-white/20"></span>
+            <span>{pageLabel}</span>
+          </div>
+        )}
+      </div>
+      <div className={`absolute ${badgeClass} bg-blue-600 text-white rounded shadow-lg`}>
+        현재 명세서: {isInvoiceA ? 'A' : 'B'}
       </div>
     </div>
   );
