@@ -1159,7 +1159,7 @@ function InvoiceSection({
   return (
     <div className="mb-2">
       {/* Section Header */}
-      <div className="bg-white sticky top-0 z-30 px-4 py-3 border-b border-gray-100 shadow-sm flex flex-col gap-2">
+      <div className="bg-gray-50 sticky top-0 z-30 px-4 py-3 border-b border-gray-200 shadow-sm flex flex-col gap-2">
         <div className="flex justify-between items-start">
           <div>
             <div className="flex items-center gap-2 mb-1">
