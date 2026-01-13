@@ -22,18 +22,30 @@ import {
 // --- Mock Data ---
 const INVOICE_A_ID = 'INV-2026-001';
 const INVOICE_B_ID = 'INV-2026-002';
+const INVOICE_C_ID = 'INV-2026-003';
 
 // 명세서별 메타 데이터 (OCR 결과로 추출된 총 세액 정보 등)
 const INVOICE_META = {
   [INVOICE_A_ID]: {
     hasSeparateTax: true, // 세액 별도 표기 명세서
-    taxAmount: 14545      // 추출된 총 세액 (예시)
+    taxAmount: 14545,     // 추출된 총 세액 (예시)
+    status: 'completed',
+    failureReason: ''
   },
   [INVOICE_B_ID]: {
     hasSeparateTax: false, // 세액 미표기/면세 등
-    taxAmount: 0
+    taxAmount: 0,
+    status: 'analyzing',
+    failureReason: ''
+  },
+  [INVOICE_C_ID]: {
+    hasSeparateTax: false,
+    taxAmount: 0,
+    status: 'failed',
+    failureReason: 'OCR API 타임아웃'
   }
 };
+
 
 const INVOICE_IMAGE_DATA = {
   [INVOICE_A_ID]: {
@@ -45,6 +57,11 @@ const INVOICE_IMAGE_DATA = {
     src: '/invoices/invoice-b.jpg',
     fileName: 'invoice-b.jpg',
     pageLabel: 'Page 2/2'
+  },
+  [INVOICE_C_ID]: {
+    src: '/invoices/invoice-b.jpg',
+    fileName: 'invoice-b.jpg',
+    pageLabel: 'Page 1/1'
   }
 };
 
@@ -97,6 +114,13 @@ const SEARCH_SCOPES = [
   { id: 'all', label: '전체' },
   { id: 'supplier', label: '공급사' },
   { id: 'product', label: '상품명' },
+];
+
+const STATUS_FILTER_OPTIONS = [
+  { id: 'all', label: '전체' },
+  { id: 'analyzing', label: 'AI분석 중' },
+  { id: 'completed', label: '완료' },
+  { id: 'failed', label: '실패' }
 ];
 
 const RECENT_SEARCHES = ['비타민하우스', '2026-001', '탁센'];
@@ -185,6 +209,20 @@ const INITIAL_DATA = [
     expiry: '2027-06-01',
     note: '반품불가',
     isLotMissing: false
+  },
+  {
+    id: 7,
+    invoiceId: INVOICE_C_ID,
+    invoiceName: '동일이미지 오류 | 2026-003',
+    status: 'failed',
+    name: '',
+    standard: '',
+    qty: 0,
+    price: 0,
+    lot: '',
+    expiry: '',
+    note: '',
+    isLotMissing: true
   }
 ];
 
@@ -447,6 +485,8 @@ export default function PharmxAIApp() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchScope, setSearchScope] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
   
   // Refs for Scroll Spy
   const listContainerRef = useRef(null);
@@ -474,6 +514,12 @@ export default function PharmxAIApp() {
       }
     }
   };
+
+  useEffect(() => {
+    if (statusFilter !== 'all') {
+      setActiveInvoiceId(INVOICE_A_ID);
+    }
+  }, [statusFilter]);
 
   // --- Handlers ---
   const startEditing = (item) => {
@@ -534,9 +580,21 @@ export default function PharmxAIApp() {
   };
   const closeSearchPanel = () => setIsSearchOpen(false);
 
+  const handleStatusDropdownBlur = (event) => {
+    if (!event.currentTarget.contains(event.relatedTarget)) {
+      setIsStatusDropdownOpen(false);
+    }
+  };
+
   // Group items
   const invoiceAGroup = items.filter(i => i.invoiceId === INVOICE_A_ID);
   const invoiceBGroup = items.filter(i => i.invoiceId === INVOICE_B_ID);
+  const invoiceCGroup = items.filter(i => i.invoiceId === INVOICE_C_ID);
+
+  const isInvoiceVisible = (invoiceId) => {
+    if (statusFilter === 'all') return true;
+    return INVOICE_META[invoiceId]?.status === statusFilter;
+  };
 
   // Calculate Totals per Invoice (Simple Sum)
   const getInvoiceTotal = (group) => {
@@ -547,6 +605,8 @@ export default function PharmxAIApp() {
   const visibleNotifications = notifications.filter(item => 
     notiTab === 'unread' ? item.unread : true
   );
+  const activeStatusLabel =
+    STATUS_FILTER_OPTIONS.find((option) => option.id === statusFilter)?.label || '전체';
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const normalizeValue = (value) => `${value ?? ''}`.toLowerCase();
   const searchResults = normalizedQuery
@@ -622,15 +682,56 @@ export default function PharmxAIApp() {
       </header>
 
       {/* 2. Filter Bar */}
-      <div className="bg-white px-4 py-2 flex items-center justify-between border-b border-gray-100 shrink-0">
+      <div className="relative z-40 bg-white px-4 py-2 flex items-center justify-between border-b border-gray-100 shrink-0">
         <div className="flex items-center gap-1 text-gray-700 font-medium text-sm bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
           <Calendar className="w-4 h-4 text-gray-500" />
           <span>2026.01.06 (화)</span>
           <ChevronDown className="w-3 h-3 text-gray-400" />
         </div>
-        <button className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors">
-          당일 업로드 조회
-        </button>
+        <div className="flex items-center gap-2">
+          <div
+            className="relative"
+            tabIndex={0}
+            onBlur={handleStatusDropdownBlur}
+          >
+            <button
+              type="button"
+              onClick={() => setIsStatusDropdownOpen(prev => !prev)}
+              className="flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold text-gray-600 hover:bg-gray-50"
+            >
+              <span className="text-[10px] text-gray-400">상태</span>
+              <span className="text-xs text-gray-700">{activeStatusLabel}</span>
+              <ChevronDown className={`w-3 h-3 text-gray-400 transition-transform ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isStatusDropdownOpen && (
+              <div className="absolute right-0 z-50 mt-2 w-36 rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
+                {STATUS_FILTER_OPTIONS.map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => {
+                      setStatusFilter(option.id);
+                      setIsStatusDropdownOpen(false);
+                    }}
+                    className={`flex w-full items-center justify-between px-3 py-2 text-xs font-semibold ${
+                      statusFilter === option.id
+                        ? 'bg-blue-50 text-blue-600'
+                        : 'text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <span>{option.label}</span>
+                    {statusFilter === option.id && (
+                      <span className="text-[10px] text-blue-500">선택</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <button className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors">
+            당일 업로드 조회
+          </button>
+        </div>
       </div>
 
       {/* 3. Split View Container */}
@@ -667,36 +768,60 @@ export default function PharmxAIApp() {
           className="flex-1 overflow-y-auto bg-gray-50 scroll-smooth transition-all"
         >
           {/* Invoice A Section */}
-          <InvoiceSection 
-            invoiceId={INVOICE_A_ID}
-            title="비타민하우스 | 2026-001" 
-            status="completed" 
-            totalAmount={getInvoiceTotal(invoiceAGroup)}
-            taxAmount={INVOICE_META[INVOICE_A_ID].taxAmount}
-            hasSeparateTax={INVOICE_META[INVOICE_A_ID].hasSeparateTax}
-            items={invoiceAGroup}
-            isEditing={isEditing}
-            isImageVisible={isImageViewVisible}
-            onToggleImage={() => setIsImageViewVisible(!isImageViewVisible)}
-            onStartEdit={startEditing}
-          />
-
-          {/* Invoice B Section */}
-          <div ref={invoiceBRef}>
+          {isInvoiceVisible(INVOICE_A_ID) && (
             <InvoiceSection 
-              invoiceId={INVOICE_B_ID}
-              title="(주)녹십자 | 2026-002" 
-              status="analyzing" 
-              totalAmount={getInvoiceTotal(invoiceBGroup)}
-              taxAmount={INVOICE_META[INVOICE_B_ID].taxAmount}
-              hasSeparateTax={INVOICE_META[INVOICE_B_ID].hasSeparateTax}
-              items={invoiceBGroup}
+              invoiceId={INVOICE_A_ID}
+              title="비타민하우스 | 2026-001" 
+              status={INVOICE_META[INVOICE_A_ID].status} 
+              totalAmount={getInvoiceTotal(invoiceAGroup)}
+              taxAmount={INVOICE_META[INVOICE_A_ID].taxAmount}
+              hasSeparateTax={INVOICE_META[INVOICE_A_ID].hasSeparateTax}
+              items={invoiceAGroup}
+              failureReason={INVOICE_META[INVOICE_A_ID].failureReason}
               isEditing={isEditing}
               isImageVisible={isImageViewVisible}
               onToggleImage={() => setIsImageViewVisible(!isImageViewVisible)}
               onStartEdit={startEditing}
             />
-          </div>
+          )}
+
+          {/* Invoice B Section */}
+          {isInvoiceVisible(INVOICE_B_ID) && (
+            <div ref={invoiceBRef}>
+              <InvoiceSection 
+                invoiceId={INVOICE_B_ID}
+                title="(주)녹십자 | 2026-002" 
+                status={INVOICE_META[INVOICE_B_ID].status} 
+                totalAmount={getInvoiceTotal(invoiceBGroup)}
+                taxAmount={INVOICE_META[INVOICE_B_ID].taxAmount}
+                hasSeparateTax={INVOICE_META[INVOICE_B_ID].hasSeparateTax}
+                items={invoiceBGroup}
+                failureReason={INVOICE_META[INVOICE_B_ID].failureReason}
+                isEditing={isEditing}
+                isImageVisible={isImageViewVisible}
+                onToggleImage={() => setIsImageViewVisible(!isImageViewVisible)}
+                onStartEdit={startEditing}
+              />
+            </div>
+          )}
+
+          {/* Invoice C Section */}
+          {isInvoiceVisible(INVOICE_C_ID) && (
+            <InvoiceSection 
+              invoiceId={INVOICE_C_ID}
+              title="동일이미지 오류 | 2026-003" 
+              status={INVOICE_META[INVOICE_C_ID].status} 
+              totalAmount={getInvoiceTotal(invoiceCGroup)}
+              taxAmount={INVOICE_META[INVOICE_C_ID].taxAmount}
+              hasSeparateTax={INVOICE_META[INVOICE_C_ID].hasSeparateTax}
+              items={invoiceCGroup}
+              failureReason={INVOICE_META[INVOICE_C_ID].failureReason}
+              isEditing={isEditing}
+              isImageVisible={isImageViewVisible}
+              onToggleImage={() => setIsImageViewVisible(!isImageViewVisible)}
+              onStartEdit={startEditing}
+            />
+          )}
 
           {/* Dynamic Bottom Spacer: Expands in edit mode to allow scrolling the last item up */}
           <div className={`transition-all duration-300 ${isEditing ? 'h-[350px]' : 'h-24'}`}></div>
@@ -1009,6 +1134,7 @@ function InvoiceSection({
   taxAmount,
   hasSeparateTax,
   items, 
+  failureReason,
   isEditing, 
   isImageVisible, 
   onToggleImage,
@@ -1021,6 +1147,8 @@ function InvoiceSection({
         return <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold border border-green-200">처리 완료</span>;
       case 'analyzing':
         return <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold border border-blue-200 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin"/>AI 분석중</span>;
+      case 'failed':
+        return <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-bold border border-red-200">처리 실패</span>;
       default:
         return <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold">대기</span>;
     }
@@ -1068,6 +1196,12 @@ function InvoiceSection({
             {isImageVisible ? <><Eye className="w-3 h-3" /> 거래명세서 보기 ON</> : <><EyeOff className="w-3 h-3" /> 거래명세서 보기 OFF</>}
           </button>
         </div>
+
+        {status === 'failed' && failureReason && (
+          <div className="mt-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-[11px] text-red-600">
+            실패 사유: {failureReason}
+          </div>
+        )}
       </div>
 
       {/* Items List */}
