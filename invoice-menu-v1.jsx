@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { 
   AlertCircle,
   Search, 
@@ -16,7 +16,6 @@ import {
   FileText,
   Eye,
   EyeOff,
-  Minimize2,
 } from 'lucide-react';
 
 // --- Mock Data ---
@@ -472,8 +471,9 @@ export default function PharmxAIApp({ onMenuChange }) {
   const [items, setItems] = useState(INITIAL_DATA);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
-  const [activeInvoiceId, setActiveInvoiceId] = useState(INVOICE_A_ID);
-  const [isImageViewVisible, setIsImageViewVisible] = useState(false);
+  const [editingInvoiceId, setEditingInvoiceId] = useState(null);
+  const [expandedInvoiceIds, setExpandedInvoiceIds] = useState({});
+  const [imageVisibilityById, setImageVisibilityById] = useState({});
   const [editViewMode, setEditViewMode] = useState('A');
   const [isEditImageVisible, setIsEditImageVisible] = useState(true);
   const [isEditImageCollapsed, setIsEditImageCollapsed] = useState(false);
@@ -487,43 +487,19 @@ export default function PharmxAIApp({ onMenuChange }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
-  
-  // Refs for Scroll Spy
-  const listContainerRef = useRef(null);
-  const invoiceBRef = useRef(null);
 
   // Computed Values
   const isEditing = editingId !== null;
-  const activeImageData = getInvoiceImageData(activeInvoiceId);
-  
-  // Determine height class based on state
-  const imageContainerHeightClass = useMemo(() => {
-    if (!isImageViewVisible) return 'h-0 border-b-0'; 
-    return 'h-[45%] border-b border-gray-400'; 
-  }, [isImageViewVisible]);
-
-  // Scroll Handler
-  const handleScroll = () => {
-    if (listContainerRef.current && invoiceBRef.current) {
-      const containerTop = listContainerRef.current.getBoundingClientRect().top;
-      const invoiceBTop = invoiceBRef.current.getBoundingClientRect().top;
-      if (invoiceBTop - containerTop < 200) {
-        setActiveInvoiceId(INVOICE_B_ID);
-      } else {
-        setActiveInvoiceId(INVOICE_A_ID);
-      }
-    }
-  };
 
   useEffect(() => {
-    if (statusFilter !== 'all') {
-      setActiveInvoiceId(INVOICE_A_ID);
-    }
+    setExpandedInvoiceIds({});
+    setImageVisibilityById({});
   }, [statusFilter]);
 
   // --- Handlers ---
   const startEditing = (item) => {
     setEditingId(item.id);
+    setEditingInvoiceId(item.invoiceId);
     setEditForm({ ...item });
     setIsEditImageVisible(true);
     setIsEditImageCollapsed(false);
@@ -531,17 +507,33 @@ export default function PharmxAIApp({ onMenuChange }) {
 
   const cancelEditing = () => {
     setEditingId(null);
+    setEditingInvoiceId(null);
     setEditForm({});
   };
 
   const saveEditing = () => {
     setItems(prev => prev.map(item => item.id === editingId ? editForm : item));
     setEditingId(null);
+    setEditingInvoiceId(null);
     setEditForm({});
   };
 
   const handleInputChange = (field, value) => {
     setEditForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleToggleExpand = (invoiceId) => {
+    setExpandedInvoiceIds(prev => ({ ...prev, [invoiceId]: !prev[invoiceId] }));
+  };
+
+  const handleToggleImage = (invoiceId) => {
+    setImageVisibilityById(prev => {
+      const nextValue = !prev[invoiceId];
+      if (nextValue) {
+        setExpandedInvoiceIds(prevExpanded => ({ ...prevExpanded, [invoiceId]: true }));
+      }
+      return { ...prev, [invoiceId]: nextValue };
+    });
   };
 
   const openCameraFlow = () => {
@@ -729,37 +721,9 @@ export default function PharmxAIApp({ onMenuChange }) {
 
       {/* 3. Split View Container */}
       <div className="flex flex-col flex-1 overflow-hidden relative">
-        
-        {/* A. Sticky Image Viewer */}
-        <div 
-          className={`bg-slate-800 w-full relative transition-all duration-500 ease-in-out shrink-0 overflow-hidden flex items-center justify-center
-            ${imageContainerHeightClass}`}
-        >
-          <ZoomableImage
-            key={activeImageData.src}
-            src={activeImageData.src}
-            alt="거래명세서 이미지"
-            maxScale={MAX_ZOOM_SCALE}
-            className="bg-slate-800"
-          />
-          
-          {!isEditing && isImageViewVisible && (
-            <button 
-              onClick={() => setIsImageViewVisible(false)}
-              className="absolute top-2 right-2 p-1.5 bg-black/20 hover:bg-black/40 text-white/70 rounded-full transition-colors"
-              title="이미지 접기"
-            >
-              <Minimize2 className="w-4 h-4" />
-            </button>
-          )}
-        </div>
 
-        {/* B. Scrollable List Area */}
-        <div 
-          ref={listContainerRef}
-          onScroll={handleScroll}
-          className="flex-1 overflow-y-auto bg-gray-50 scroll-smooth transition-all"
-        >
+        {/* A. Scrollable List Area */}
+        <div className="flex-1 overflow-y-auto bg-gray-50 scroll-smooth transition-all">
           {/* Invoice A Section */}
           {isInvoiceVisible(INVOICE_A_ID) && (
             <InvoiceSection 
@@ -772,30 +736,32 @@ export default function PharmxAIApp({ onMenuChange }) {
               items={invoiceAGroup}
               failureReason={INVOICE_META[INVOICE_A_ID].failureReason}
               isEditing={isEditing}
-              isImageVisible={isImageViewVisible}
-              onToggleImage={() => setIsImageViewVisible(!isImageViewVisible)}
+              isExpanded={!!expandedInvoiceIds[INVOICE_A_ID]}
+              isImageVisible={!!imageVisibilityById[INVOICE_A_ID]}
+              onToggleExpand={() => handleToggleExpand(INVOICE_A_ID)}
+              onToggleImage={() => handleToggleImage(INVOICE_A_ID)}
               onStartEdit={startEditing}
             />
           )}
 
           {/* Invoice B Section */}
           {isInvoiceVisible(INVOICE_B_ID) && (
-            <div ref={invoiceBRef}>
-              <InvoiceSection 
-                invoiceId={INVOICE_B_ID}
-                title="(주)녹십자 | 2026-002" 
-                status={INVOICE_META[INVOICE_B_ID].status} 
-                totalAmount={getInvoiceTotal(invoiceBGroup)}
-                taxAmount={INVOICE_META[INVOICE_B_ID].taxAmount}
-                hasSeparateTax={INVOICE_META[INVOICE_B_ID].hasSeparateTax}
-                items={invoiceBGroup}
-                failureReason={INVOICE_META[INVOICE_B_ID].failureReason}
-                isEditing={isEditing}
-                isImageVisible={isImageViewVisible}
-                onToggleImage={() => setIsImageViewVisible(!isImageViewVisible)}
-                onStartEdit={startEditing}
-              />
-            </div>
+            <InvoiceSection 
+              invoiceId={INVOICE_B_ID}
+              title="(주)녹십자 | 2026-002" 
+              status={INVOICE_META[INVOICE_B_ID].status} 
+              totalAmount={getInvoiceTotal(invoiceBGroup)}
+              taxAmount={INVOICE_META[INVOICE_B_ID].taxAmount}
+              hasSeparateTax={INVOICE_META[INVOICE_B_ID].hasSeparateTax}
+              items={invoiceBGroup}
+              failureReason={INVOICE_META[INVOICE_B_ID].failureReason}
+              isEditing={isEditing}
+              isExpanded={!!expandedInvoiceIds[INVOICE_B_ID]}
+              isImageVisible={!!imageVisibilityById[INVOICE_B_ID]}
+              onToggleExpand={() => handleToggleExpand(INVOICE_B_ID)}
+              onToggleImage={() => handleToggleImage(INVOICE_B_ID)}
+              onStartEdit={startEditing}
+            />
           )}
 
           {/* Invoice C Section */}
@@ -810,8 +776,10 @@ export default function PharmxAIApp({ onMenuChange }) {
               items={invoiceCGroup}
               failureReason={INVOICE_META[INVOICE_C_ID].failureReason}
               isEditing={isEditing}
-              isImageVisible={isImageViewVisible}
-              onToggleImage={() => setIsImageViewVisible(!isImageViewVisible)}
+              isExpanded={!!expandedInvoiceIds[INVOICE_C_ID]}
+              isImageVisible={!!imageVisibilityById[INVOICE_C_ID]}
+              onToggleExpand={() => handleToggleExpand(INVOICE_C_ID)}
+              onToggleImage={() => handleToggleImage(INVOICE_C_ID)}
               onStartEdit={startEditing}
             />
           )}
@@ -823,7 +791,7 @@ export default function PharmxAIApp({ onMenuChange }) {
         {isEditing && (
           <EditOverlay 
             data={editForm}
-            invoiceId={editForm.invoiceId}
+            invoiceId={editingInvoiceId}
             viewMode={editViewMode}
             onViewModeChange={setEditViewMode}
             isImageVisible={isEditImageVisible}
@@ -1149,11 +1117,13 @@ function InvoiceSection({
   items, 
   failureReason,
   isEditing, 
-  isImageVisible, 
+  isExpanded,
+  isImageVisible,
   onToggleImage,
+  onToggleExpand,
   onStartEdit
 }) {
-  
+  const imageData = getInvoiceImageData(invoiceId);
   const getStatusBadge = (status) => {
     switch(status) {
       case 'completed': 
@@ -1184,55 +1154,94 @@ function InvoiceSection({
 
   return (
     <div className={`mb-4 border-l-4 ${getStatusAccent(status)} pl-3`}>
-      {/* Section Header */}
-      <div className="bg-gray-50 sticky top-0 z-30 px-4 py-2 border-b-2 border-gray-200 shadow-sm flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {getStatusBadge(status)}
-            <span className="text-xs text-gray-400 font-medium">No. {title.split('|')[1]}</span>
+      <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+        <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {getStatusBadge(status)}
+              <span className="text-xs text-gray-400 font-medium">No. {title.split('|')[1]}</span>
+            </div>
+            <button 
+              onClick={onToggleImage}
+              disabled={isEditing}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
+                isImageVisible ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-gray-50 border-gray-200 text-gray-400'
+              } ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {isImageVisible ? <><Eye className="w-3 h-3" /> 거래명세서 보기 ON</> : <><EyeOff className="w-3 h-3" /> 거래명세서 보기 OFF</>}
+            </button>
           </div>
-          <button 
-            onClick={onToggleImage}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors border ${isImageVisible ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-gray-50 border-gray-200 text-gray-400'}`}
-          >
-            {isImageVisible ? <><Eye className="w-3 h-3" /> 거래명세서 보기 ON</> : <><EyeOff className="w-3 h-3" /> 거래명세서 보기 OFF</>}
-          </button>
+
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="text-base font-bold text-gray-900 truncate">{title.split('|')[0]}</h2>
+              {hasSeparateTax && (
+                <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-600">
+                  <span>공급가액 {formatCurrency(supplyValue)}</span>
+                  <span className="w-px h-3 bg-gray-300 inline-block"></span>
+                  <span>세액 {formatCurrency(taxAmount)}</span>
+                </div>
+              )}
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] font-semibold text-gray-500">총 합계</p>
+              <p className="text-lg font-bold text-gray-900">₩{formatCurrency(totalAmount)}</p>
+            </div>
+          </div>
+
+          {status === 'failed' && failureReason && (
+            <div className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-[11px] text-red-600">
+              미처리 사유: {failureReason}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={onToggleExpand}
+              disabled={isEditing}
+              className={`flex items-center gap-1 text-xs font-semibold ${
+                isExpanded ? 'text-blue-600' : 'text-gray-500'
+              } ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {isExpanded ? '제품 접기' : '제품 펼치기'}
+              <ChevronDown className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+            </button>
+            <span className="text-[10px] text-gray-400">품목 {items.length}개</span>
+          </div>
         </div>
 
-        <div className="flex items-end justify-between gap-3">
-          <div className="min-w-0">
-            <h2 className="text-base font-bold text-gray-900 truncate">{title.split('|')[0]}</h2>
-            {hasSeparateTax && (
-              <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-600">
-                <span>공급가액 {formatCurrency(supplyValue)}</span>
-                <span className="w-px h-3 bg-gray-300 inline-block"></span>
-                <span>세액 {formatCurrency(taxAmount)}</span>
+        {isExpanded && (
+          <div className="bg-white border-l border-gray-200">
+            {isImageVisible && (
+              <div className="h-52 border-b border-gray-200 bg-slate-800">
+                <ZoomableImage
+                  key={imageData.src}
+                  src={imageData.src}
+                  alt="거래명세서 이미지"
+                  maxScale={MAX_ZOOM_SCALE}
+                  className="bg-slate-800"
+                />
+              </div>
+            )}
+            {items.length === 0 ? (
+              <div className="px-4 py-6 text-center text-xs text-gray-400">
+                표시할 품목이 없습니다.
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-100">
+                {items.map((item) => (
+                  <ViewItem 
+                    key={item.id} 
+                    data={item} 
+                    onEdit={() => onStartEdit(item)} 
+                    disabled={isEditing}
+                  />
+                ))}
               </div>
             )}
           </div>
-          <div className="text-right">
-            <p className="text-[10px] font-semibold text-gray-500">총 합계</p>
-            <p className="text-lg font-bold text-gray-900">₩{formatCurrency(totalAmount)}</p>
-          </div>
-        </div>
-
-        {status === 'failed' && failureReason && (
-          <div className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-[11px] text-red-600">
-            미처리 사유: {failureReason}
-          </div>
         )}
-      </div>
-
-      {/* Items List */}
-      <div className="bg-white divide-y divide-gray-100 border-l border-gray-200">
-        {items.map((item) => (
-          <ViewItem 
-            key={item.id} 
-            data={item} 
-            onEdit={() => onStartEdit(item)} 
-            disabled={isEditing}
-          />
-        ))}
       </div>
     </div>
   );
