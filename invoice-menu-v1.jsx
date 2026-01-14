@@ -646,14 +646,6 @@ export default function PharmxAIApp({ onMenuChange }) {
         <div className="flex gap-4">
           <button
             type="button"
-            onClick={openCameraFlow}
-            aria-label="거래명세서 촬영"
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <Camera className="w-5 h-5" />
-          </button>
-          <button
-            type="button"
             onClick={toggleSearchPanel}
             aria-label="검색"
             className="text-gray-500 hover:text-gray-700"
@@ -845,6 +837,15 @@ export default function PharmxAIApp({ onMenuChange }) {
         )}
 
       </div>
+
+      <button
+        type="button"
+        onClick={openCameraFlow}
+        aria-label="거래명세서 촬영"
+        className="fixed bottom-6 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-200 transition-colors hover:bg-blue-700"
+      >
+        <Camera className="h-5 w-5" />
+      </button>
 
       {isSearchOpen && (
         <div 
