@@ -1541,6 +1541,7 @@ function InvoiceSection({
 }) {
   const supplyValue = hasSeparateTax ? totalAmount - taxAmount : totalAmount;
   const imageData = getInvoiceImageData(invoiceId);
+  const isFailed = status === 'failed';
   
   const getStatusBadge = (status) => {
     switch(status) {
@@ -1588,10 +1589,10 @@ function InvoiceSection({
             </button>
           </div>
 
-          <div className="flex items-end justify-between gap-3">
+          <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="text-base font-bold text-gray-900 truncate">{title.split('|')[0]}</h2>
-              {hasSeparateTax && (
+              {hasSeparateTax && !isFailed && (
                 <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-600">
                   <span>공급가액 {formatCurrency(supplyValue)}</span>
                   <span className="w-px h-3 bg-gray-300 inline-block"></span>
@@ -1599,17 +1600,18 @@ function InvoiceSection({
                 </div>
               )}
             </div>
-            <div className="text-right">
-              <p className="text-[10px] font-semibold text-gray-500">총 합계</p>
-              <p className="text-lg font-bold text-gray-900">₩{formatCurrency(totalAmount)}</p>
-            </div>
+            {isFailed ? (
+              <div className="max-w-[45%] text-right">
+                <p className="text-[10px] font-semibold text-gray-500">미처리 사유</p>
+                <p className="text-xs font-semibold text-red-600 truncate">{failureReason || '사유 확인 중'}</p>
+              </div>
+            ) : (
+              <div className="text-right">
+                <p className="text-[10px] font-semibold text-gray-500">총 합계</p>
+                <p className="text-lg font-bold text-gray-900">₩{formatCurrency(totalAmount)}</p>
+              </div>
+            )}
           </div>
-
-          {status === 'failed' && failureReason && (
-            <div className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-[11px] text-red-600">
-              미처리 사유: {failureReason}
-            </div>
-          )}
 
           <div className="flex items-center justify-between">
             <button
