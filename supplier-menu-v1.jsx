@@ -1572,7 +1572,7 @@ function InvoiceSection({
   return (
     <div className={`border-l-4 ${getStatusAccent(status)} pl-3`}>
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-        <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex flex-col gap-2">
+        <div className="bg-gray-50 px-4 py-1.5 border-b border-gray-200 flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {getStatusBadge(status)}
@@ -1589,45 +1589,44 @@ function InvoiceSection({
             </button>
           </div>
 
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <h2 className="text-base font-bold text-gray-900 truncate">{title.split('|')[0]}</h2>
-              {hasSeparateTax && !isFailed && (
-                <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-600">
-                  <span>공급가액 {formatCurrency(supplyValue)}</span>
-                  <span className="w-px h-3 bg-gray-300 inline-block"></span>
-                  <span>세액 {formatCurrency(taxAmount)}</span>
-                </div>
-              )}
             </div>
             {isFailed ? (
-              <div className="max-w-[45%] text-right">
-                <p className="text-[10px] font-semibold text-gray-500">미처리 사유</p>
-                <p className="text-xs font-semibold text-red-600 truncate">{failureReason || '사유 확인 중'}</p>
-              </div>
+              <p className="max-w-[45%] text-xs font-semibold text-red-600 truncate text-right">
+                {failureReason || '사유 확인 중'}
+              </p>
             ) : (
               <div className="text-right">
                 <p className="text-[10px] font-semibold text-gray-500">총 합계</p>
-                <p className="text-lg font-bold text-gray-900">₩{formatCurrency(totalAmount)}</p>
+                <p className="text-base font-bold text-gray-900">₩{formatCurrency(totalAmount)}</p>
               </div>
             )}
           </div>
 
-          <div className="flex items-center justify-between">
-            <button
-              type="button"
-              onClick={onToggleExpand}
-              disabled={isEditing}
-              className={`flex items-center gap-1 text-xs font-semibold ${
-                isExpanded ? 'text-blue-600' : 'text-gray-500'
-              } ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {isExpanded ? '제품 접기' : '제품 펼치기'}
-              <ChevronDown className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-            </button>
-            <span className="text-[10px] text-gray-400">품목 {items.length}개</span>
+          <div className="text-xs font-semibold text-gray-600">
+            {isFailed ? (
+              <span>품목 {items.length}개 | 미처리</span>
+            ) : (
+              <span>
+                품목 {items.length}개 | 공급가액 {formatCurrency(supplyValue)} | 세액 {formatCurrency(taxAmount)}
+              </span>
+            )}
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={onToggleExpand}
+          disabled={isEditing}
+          className={`w-full flex items-center justify-center gap-2 border-t border-gray-200 px-4 py-1.5 text-xs font-semibold transition-colors ${
+            isExpanded ? 'text-blue-600 bg-blue-50/40' : 'text-gray-600 bg-white'
+          } ${isEditing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'}`}
+        >
+          {isExpanded ? '제품 접기' : '제품 펼치기'}
+          <ChevronDown className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+        </button>
 
         {isExpanded && (
           <div className="bg-white border-l border-gray-200">

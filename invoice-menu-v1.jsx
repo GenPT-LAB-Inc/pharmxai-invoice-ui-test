@@ -22,6 +22,8 @@ import {
 const INVOICE_A_ID = 'INV-2026-001';
 const INVOICE_B_ID = 'INV-2026-002';
 const INVOICE_C_ID = 'INV-2026-003';
+const DAILY_UPLOAD_INVOICE_IDS = [INVOICE_A_ID, INVOICE_B_ID, INVOICE_C_ID];
+const DAILY_UPLOAD_DATE_LABEL = '2026.01.06 (화)';
 
 // 명세서별 메타 데이터 (OCR 결과로 추출된 총 세액 정보 등)
 const INVOICE_META = {
@@ -483,10 +485,14 @@ export default function PharmxAIApp({ onMenuChange }) {
   const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isDailyUploadOpen, setIsDailyUploadOpen] = useState(false);
   const [searchScope, setSearchScope] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+  const [dailyStatusFilter, setDailyStatusFilter] = useState('all');
+  const [dailyExpandedInvoiceIds, setDailyExpandedInvoiceIds] = useState({});
+  const [dailyImageVisibilityById, setDailyImageVisibilityById] = useState({});
 
   // Computed Values
   const isEditing = editingId !== null;
@@ -498,6 +504,7 @@ export default function PharmxAIApp({ onMenuChange }) {
 
   // --- Handlers ---
   const startEditing = (item) => {
+    setIsDailyUploadOpen(false);
     setEditingId(item.id);
     setEditingInvoiceId(item.invoiceId);
     setEditForm({ ...item });
@@ -541,6 +548,7 @@ export default function PharmxAIApp({ onMenuChange }) {
     setIsNotiOpen(false);
     setIsMenuOpen(false);
     setIsSearchOpen(false);
+    setIsDailyUploadOpen(false);
   };
   const closeCameraFlow = () => setIsCameraFlowOpen(false);
 
@@ -549,6 +557,7 @@ export default function PharmxAIApp({ onMenuChange }) {
     setIsMenuOpen(false);
     setIsSearchOpen(false);
     setIsCameraFlowOpen(false);
+    setIsDailyUploadOpen(false);
   };
   const closeNotiPanel = () => setIsNotiOpen(false);
   const markAllNotificationsRead = () =>
@@ -561,6 +570,7 @@ export default function PharmxAIApp({ onMenuChange }) {
     setIsNotiOpen(false);
     setIsSearchOpen(false);
     setIsCameraFlowOpen(false);
+    setIsDailyUploadOpen(false);
   };
   const closeMenuPanel = () => setIsMenuOpen(false);
 
@@ -569,8 +579,35 @@ export default function PharmxAIApp({ onMenuChange }) {
     setIsNotiOpen(false);
     setIsMenuOpen(false);
     setIsCameraFlowOpen(false);
+    setIsDailyUploadOpen(false);
   };
   const closeSearchPanel = () => setIsSearchOpen(false);
+
+  const openDailyUploadPanel = () => {
+    setIsDailyUploadOpen(true);
+    setDailyStatusFilter('all');
+    setDailyExpandedInvoiceIds({});
+    setDailyImageVisibilityById({});
+    setIsNotiOpen(false);
+    setIsMenuOpen(false);
+    setIsSearchOpen(false);
+    setIsCameraFlowOpen(false);
+  };
+  const closeDailyUploadPanel = () => setIsDailyUploadOpen(false);
+
+  const handleDailyToggleExpand = (invoiceId) => {
+    setDailyExpandedInvoiceIds(prev => ({ ...prev, [invoiceId]: !prev[invoiceId] }));
+  };
+
+  const handleDailyToggleImage = (invoiceId) => {
+    setDailyImageVisibilityById(prev => {
+      const nextValue = !prev[invoiceId];
+      if (nextValue) {
+        setDailyExpandedInvoiceIds(prevExpanded => ({ ...prevExpanded, [invoiceId]: true }));
+      }
+      return { ...prev, [invoiceId]: nextValue };
+    });
+  };
 
   const handleStatusDropdownBlur = (event) => {
     if (!event.currentTarget.contains(event.relatedTarget)) {
@@ -582,6 +619,16 @@ export default function PharmxAIApp({ onMenuChange }) {
   const invoiceAGroup = items.filter(i => i.invoiceId === INVOICE_A_ID);
   const invoiceBGroup = items.filter(i => i.invoiceId === INVOICE_B_ID);
   const invoiceCGroup = items.filter(i => i.invoiceId === INVOICE_C_ID);
+  const invoiceGroupsById = {
+    [INVOICE_A_ID]: invoiceAGroup,
+    [INVOICE_B_ID]: invoiceBGroup,
+    [INVOICE_C_ID]: invoiceCGroup
+  };
+  const invoiceTitlesById = {
+    [INVOICE_A_ID]: '비타민하우스 | 2026-001',
+    [INVOICE_B_ID]: '(주)녹십자 | 2026-002',
+    [INVOICE_C_ID]: ' | '
+  };
 
   const isInvoiceVisible = (invoiceId) => {
     if (statusFilter === 'all') return true;
@@ -591,6 +638,36 @@ export default function PharmxAIApp({ onMenuChange }) {
   // Calculate Totals per Invoice (Simple Sum)
   const getInvoiceTotal = (group) => {
     return group.reduce((acc, item) => acc + (item.qty * item.price), 0);
+  };
+
+  const dailyUploadInvoices = DAILY_UPLOAD_INVOICE_IDS.map((invoiceId) => {
+    const meta = INVOICE_META[invoiceId] || INVOICE_META[INVOICE_A_ID];
+    const itemsForInvoice = invoiceGroupsById[invoiceId] || [];
+    return {
+      invoiceId,
+      title: invoiceTitlesById[invoiceId] || '',
+      status: meta.status || 'completed',
+      totalAmount: getInvoiceTotal(itemsForInvoice),
+      taxAmount: meta.taxAmount,
+      hasSeparateTax: meta.hasSeparateTax,
+      items: itemsForInvoice,
+      failureReason: meta.failureReason || ''
+    };
+  });
+
+  const dailyStatusCounts = dailyUploadInvoices.reduce((acc, invoice) => {
+    acc[invoice.status] = (acc[invoice.status] || 0) + 1;
+    return acc;
+  }, {});
+  const dailyTotalCount = dailyUploadInvoices.length;
+  const dailyFilteredInvoices = dailyStatusFilter === 'all'
+    ? dailyUploadInvoices
+    : dailyUploadInvoices.filter(invoice => invoice.status === dailyStatusFilter);
+  const dailyStatusTone = {
+    all: { active: 'border-gray-200 bg-gray-100 text-gray-600', dot: 'bg-gray-400' },
+    analyzing: { active: 'border-blue-200 bg-blue-50 text-blue-600', dot: 'bg-blue-500' },
+    completed: { active: 'border-green-200 bg-green-50 text-green-600', dot: 'bg-green-500' },
+    failed: { active: 'border-red-200 bg-red-50 text-red-600', dot: 'bg-red-500' }
   };
 
   const unreadCount = notifications.filter(item => item.unread).length;
@@ -666,61 +743,147 @@ export default function PharmxAIApp({ onMenuChange }) {
         </div>
       </header>
 
-      {/* 2. Filter Bar */}
-      <div className="relative z-40 bg-white px-4 py-2 flex items-center justify-between border-b border-gray-100 shrink-0">
-        <div className="flex items-center gap-1 text-gray-700 font-medium text-sm bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
-          <Calendar className="w-4 h-4 text-gray-500" />
-          <span>2026.01.06 (화)</span>
-          <ChevronDown className="w-3 h-3 text-gray-400" />
-        </div>
-        <div className="flex items-center gap-2">
-          <div
-            className="relative"
-            tabIndex={0}
-            onBlur={handleStatusDropdownBlur}
-          >
+      {isDailyUploadOpen ? (
+        <div className="flex flex-col flex-1 bg-gray-50">
+          <div className="bg-white px-4 py-3 border-b border-gray-200 flex items-start justify-between">
+            <div>
+              <p className="text-sm font-bold text-gray-900">당일 업로드 조회</p>
+              <p className="text-[10px] text-gray-400">{DAILY_UPLOAD_DATE_LABEL}</p>
+            </div>
             <button
               type="button"
-              onClick={() => setIsStatusDropdownOpen(prev => !prev)}
-              className="flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold text-gray-600 hover:bg-gray-50"
+              onClick={closeDailyUploadPanel}
+              className="rounded-full border border-gray-200 px-3 py-1 text-[10px] font-semibold text-gray-600 hover:bg-gray-50"
             >
-              <span className="text-[10px] text-gray-400">상태</span>
-              <span className="text-xs text-gray-700">{activeStatusLabel}</span>
-              <ChevronDown className={`w-3 h-3 text-gray-400 transition-transform ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
+              닫기
             </button>
-            {isStatusDropdownOpen && (
-              <div className="absolute right-0 z-50 mt-2 w-36 rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
-                {STATUS_FILTER_OPTIONS.map((option) => (
+          </div>
+
+          <div className="bg-white border-b border-gray-100 px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] text-gray-400">총 업로드</p>
+                <p className="text-lg font-bold text-gray-900">{dailyTotalCount}건</p>
+              </div>
+              <p className="text-[10px] text-gray-400">상태를 선택하면 자동 필터링</p>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {STATUS_FILTER_OPTIONS.map((option) => {
+                const isActive = dailyStatusFilter === option.id;
+                const tone = dailyStatusTone[option.id] || dailyStatusTone.all;
+                const count = option.id === 'all'
+                  ? dailyTotalCount
+                  : (dailyStatusCounts[option.id] || 0);
+                return (
                   <button
                     key={option.id}
                     type="button"
-                    onClick={() => {
-                      setStatusFilter(option.id);
-                      setIsStatusDropdownOpen(false);
-                    }}
-                    className={`flex w-full items-center justify-between px-3 py-2 text-xs font-semibold ${
-                      statusFilter === option.id
-                        ? 'bg-blue-50 text-blue-600'
-                        : 'text-gray-600 hover:bg-gray-50'
+                    onClick={() => setDailyStatusFilter(option.id)}
+                    className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+                      isActive ? tone.active : 'border-gray-200 bg-white text-gray-500'
                     }`}
                   >
+                    <span className={`h-2 w-2 rounded-full ${tone.dot}`}></span>
                     <span>{option.label}</span>
-                    {statusFilter === option.id && (
-                      <span className="text-[10px] text-blue-500">선택</span>
-                    )}
+                    <span className="text-[10px] font-bold">{count}건</span>
                   </button>
-                ))}
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-4 py-3">
+            {dailyFilteredInvoices.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-6 text-center text-xs text-gray-400">
+                선택한 상태에 해당하는 거래명세서가 없습니다.
               </div>
+            ) : (
+              dailyFilteredInvoices.map((invoice) => (
+                <InvoiceSection
+                  key={`daily-${invoice.invoiceId}`}
+                  invoiceId={invoice.invoiceId}
+                  title={invoice.title}
+                  status={invoice.status}
+                  totalAmount={invoice.totalAmount}
+                  taxAmount={invoice.taxAmount}
+                  hasSeparateTax={invoice.hasSeparateTax}
+                  items={invoice.items}
+                  failureReason={invoice.failureReason}
+                  isEditing={isEditing}
+                  isExpanded={!!dailyExpandedInvoiceIds[invoice.invoiceId]}
+                  isImageVisible={!!dailyImageVisibilityById[invoice.invoiceId]}
+                  onToggleExpand={() => handleDailyToggleExpand(invoice.invoiceId)}
+                  onToggleImage={() => handleDailyToggleImage(invoice.invoiceId)}
+                  onStartEdit={(item) => {
+                    closeDailyUploadPanel();
+                    startEditing(item);
+                  }}
+                />
+              ))
             )}
           </div>
-          <button className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors">
-            당일 업로드 조회
-          </button>
         </div>
-      </div>
+      ) : (
+        <>
+          {/* 2. Filter Bar */}
+          <div className="relative z-40 bg-white px-4 py-2 flex items-center justify-between border-b border-gray-100 shrink-0">
+            <div className="flex items-center gap-1 text-gray-700 font-medium text-sm bg-gray-50 px-2 py-1 rounded-md border border-gray-200">
+              <Calendar className="w-4 h-4 text-gray-500" />
+              <span>2026.01.06 (화)</span>
+              <ChevronDown className="w-3 h-3 text-gray-400" />
+            </div>
+            <div className="flex items-center gap-2">
+              <div
+                className="relative"
+                tabIndex={0}
+                onBlur={handleStatusDropdownBlur}
+              >
+                <button
+                  type="button"
+                  onClick={() => setIsStatusDropdownOpen(prev => !prev)}
+                  className="flex items-center gap-1 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold text-gray-600 hover:bg-gray-50"
+                >
+                  <span className="text-[10px] text-gray-400">상태</span>
+                  <span className="text-xs text-gray-700">{activeStatusLabel}</span>
+                  <ChevronDown className={`w-3 h-3 text-gray-400 transition-transform ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isStatusDropdownOpen && (
+                  <div className="absolute right-0 z-50 mt-2 w-36 rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
+                    {STATUS_FILTER_OPTIONS.map((option) => (
+                      <button
+                        key={option.id}
+                        type="button"
+                        onClick={() => {
+                          setStatusFilter(option.id);
+                          setIsStatusDropdownOpen(false);
+                        }}
+                        className={`flex w-full items-center justify-between px-3 py-2 text-xs font-semibold ${
+                          statusFilter === option.id
+                            ? 'bg-blue-50 text-blue-600'
+                            : 'text-gray-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        <span>{option.label}</span>
+                        {statusFilter === option.id && (
+                          <span className="text-[10px] text-blue-500">선택</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={openDailyUploadPanel}
+                className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors"
+              >
+                당일 업로드 조회
+              </button>
+            </div>
+          </div>
 
-      {/* 3. Split View Container */}
-      <div className="flex flex-col flex-1 overflow-hidden relative">
+          {/* 3. Split View Container */}
+          <div className="flex flex-col flex-1 overflow-hidden relative">
 
         {/* A. Scrollable List Area */}
         <div className="flex-1 overflow-y-auto bg-gray-50 scroll-smooth transition-all">
@@ -804,7 +967,9 @@ export default function PharmxAIApp({ onMenuChange }) {
           />
         )}
 
-      </div>
+          </div>
+        </>
+      )}
 
       <button
         type="button"
@@ -1156,7 +1321,7 @@ function InvoiceSection({
   return (
     <div className={`mb-4 border-l-4 ${getStatusAccent(status)} pl-3`}>
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-        <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex flex-col gap-2">
+        <div className="bg-gray-50 px-4 py-1.5 border-b border-gray-200 flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {getStatusBadge(status)}
@@ -1173,45 +1338,44 @@ function InvoiceSection({
             </button>
           </div>
 
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <h2 className="text-base font-bold text-gray-900 truncate">{title.split('|')[0]}</h2>
-              {hasSeparateTax && !isFailed && (
-                <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-600">
-                  <span>공급가액 {formatCurrency(supplyValue)}</span>
-                  <span className="w-px h-3 bg-gray-300 inline-block"></span>
-                  <span>세액 {formatCurrency(taxAmount)}</span>
-                </div>
-              )}
             </div>
             {isFailed ? (
-              <div className="max-w-[45%] text-right">
-                <p className="text-[10px] font-semibold text-gray-500">미처리 사유</p>
-                <p className="text-xs font-semibold text-red-600 truncate">{failureReason || '사유 확인 중'}</p>
-              </div>
+              <p className="max-w-[45%] text-xs font-semibold text-red-600 truncate text-right">
+                {failureReason || '사유 확인 중'}
+              </p>
             ) : (
               <div className="text-right">
                 <p className="text-[10px] font-semibold text-gray-500">총 합계</p>
-                <p className="text-lg font-bold text-gray-900">₩{formatCurrency(totalAmount)}</p>
+                <p className="text-base font-bold text-gray-900">₩{formatCurrency(totalAmount)}</p>
               </div>
             )}
           </div>
 
-          <div className="flex items-center justify-between">
-            <button
-              type="button"
-              onClick={onToggleExpand}
-              disabled={isEditing}
-              className={`flex items-center gap-1 text-xs font-semibold ${
-                isExpanded ? 'text-blue-600' : 'text-gray-500'
-              } ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {isExpanded ? '제품 접기' : '제품 펼치기'}
-              <ChevronDown className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-            </button>
-            <span className="text-[10px] text-gray-400">품목 {items.length}개</span>
+          <div className="text-xs font-semibold text-gray-600">
+            {isFailed ? (
+              <span>품목 {items.length}개 | 미처리</span>
+            ) : (
+              <span>
+                품목 {items.length}개 | 공급가액 {formatCurrency(supplyValue)} | 세액 {formatCurrency(taxAmount)}
+              </span>
+            )}
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={onToggleExpand}
+          disabled={isEditing}
+          className={`w-full flex items-center justify-center gap-2 border-t border-gray-200 px-4 py-1.5 text-xs font-semibold transition-colors ${
+            isExpanded ? 'text-blue-600 bg-blue-50/40' : 'text-gray-600 bg-white'
+          } ${isEditing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'}`}
+        >
+          {isExpanded ? '제품 접기' : '제품 펼치기'}
+          <ChevronDown className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+        </button>
 
         {isExpanded && (
           <div className="bg-white border-l border-gray-200">
