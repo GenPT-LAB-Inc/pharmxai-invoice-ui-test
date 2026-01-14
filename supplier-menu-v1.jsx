@@ -1292,7 +1292,7 @@ function InvoiceDetailView({ invoiceId, onBack }) {
   const [items, setItems] = useState(initialItems);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
-  const [isImageViewVisible, setIsImageViewVisible] = useState(true);
+  const [isImageViewVisible, setIsImageViewVisible] = useState(false);
   const [editViewMode, setEditViewMode] = useState('A');
   const [isEditImageVisible, setIsEditImageVisible] = useState(true);
   const [isEditImageCollapsed, setIsEditImageCollapsed] = useState(false);
@@ -1308,9 +1308,8 @@ function InvoiceDetailView({ invoiceId, onBack }) {
   // Determine height class based on state
   const imageContainerHeightClass = useMemo(() => {
     if (!isImageViewVisible) return 'h-0 border-b-0'; 
-    if (isEditing) return 'h-[20%] border-b border-gray-400'; 
     return 'h-[45%] border-b border-gray-400'; 
-  }, [isImageViewVisible, isEditing]);
+  }, [isImageViewVisible]);
 
   // Calculations
   const totalAmount = items.reduce((acc, item) => acc + (item.qty * item.price), 0);
@@ -1367,7 +1366,7 @@ function InvoiceDetailView({ invoiceId, onBack }) {
         </div>
 
         {/* Bottom: List */}
-        <div className="flex-1 overflow-y-auto bg-gray-50 pb-20 scroll-smooth">
+        <div className="flex-1 overflow-y-auto bg-gray-50 scroll-smooth transition-all">
            <InvoiceSection 
              invoiceId={activeId}
              title={title}
@@ -1378,14 +1377,9 @@ function InvoiceDetailView({ invoiceId, onBack }) {
              items={items}
              failureReason={meta.failureReason}
              isEditing={isEditing}
-             editingId={editingId}
-             editForm={editForm}
              isImageVisible={isImageViewVisible}
              onToggleImage={() => setIsImageViewVisible(!isImageViewVisible)}
              onStartEdit={handleEditStart}
-             onCancelEdit={handleEditCancel}
-             onSaveEdit={handleEditSave}
-             onChange={handleInputChange}
            />
            <div className={`transition-all duration-300 ${isEditing ? 'h-[350px]' : 'h-24'}`}></div>
         </div>
@@ -1424,58 +1418,46 @@ function InvoiceSection({
   items, 
   failureReason,
   isEditing,
-  editingId,
-  editForm,
   isImageVisible, 
   onToggleImage,
-  onStartEdit,
-  onCancelEdit,
-  onSaveEdit,
-  onChange
+  onStartEdit
 }) {
   const supplyValue = hasSeparateTax ? totalAmount - taxAmount : totalAmount;
   
   const getStatusBadge = (status) => {
     switch(status) {
       case 'completed': 
-        return <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold border border-green-200">처리 완료</span>;
+        return <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold border border-green-200">완료</span>;
       case 'analyzing':
         return <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold border border-blue-200 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin"/>AI 분석중</span>;
       case 'failed':
-        return <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-bold border border-red-200">처리 실패</span>;
+        return <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-bold border border-red-200">미처리</span>;
       default:
         return <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold">대기</span>;
     }
   };
 
+  const getStatusAccent = (status) => {
+    switch (status) {
+      case 'completed':
+        return 'border-green-500';
+      case 'analyzing':
+        return 'border-blue-500';
+      case 'failed':
+        return 'border-red-500';
+      default:
+        return 'border-gray-300';
+    }
+  };
+
   return (
-    <div className="mb-2">
-      <div className="bg-white sticky top-0 z-30 px-4 py-3 border-b border-gray-100 shadow-sm flex flex-col gap-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              {getStatusBadge(status)}
-              <span className="text-xs text-gray-400 font-medium">No. {title.split('|')[1]}</span>
-            </div>
-            <h2 className="text-sm font-bold text-gray-800">{title.split('|')[0]}</h2>
+    <div className={`mb-4 border-l-4 ${getStatusAccent(status)} pl-3`}>
+      <div className="bg-gray-50 sticky top-0 z-30 px-4 py-2 border-b-2 border-gray-200 shadow-sm flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {getStatusBadge(status)}
+            <span className="text-xs text-gray-400 font-medium">No. {title.split('|')[1]}</span>
           </div>
-          <div className="text-right">
-             {hasSeparateTax && (
-               <div className="flex flex-col items-end mb-1">
-                 <div className="flex gap-2 text-[10px] text-gray-400">
-                   <span>공급가액 {formatCurrency(supplyValue)}</span>
-                   <span className="w-px h-3 bg-gray-200 inline-block"></span>
-                   <span>세액 {formatCurrency(taxAmount)}</span>
-                 </div>
-               </div>
-             )}
-             <div className="flex items-center justify-end gap-1">
-                <span className="text-[10px] text-gray-400">총 합계</span>
-                <p className="text-sm font-bold text-gray-900">₩{formatCurrency(totalAmount)}</p>
-             </div>
-          </div>
-        </div>
-        <div className="flex justify-end border-t border-gray-50 pt-2">
           <button 
             onClick={onToggleImage}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors border ${isImageVisible ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-gray-50 border-gray-200 text-gray-400'}`}
@@ -1484,20 +1466,39 @@ function InvoiceSection({
           </button>
         </div>
 
+        <div className="flex items-end justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-base font-bold text-gray-900 truncate">{title.split('|')[0]}</h2>
+            {hasSeparateTax && (
+              <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-600">
+                <span>공급가액 {formatCurrency(supplyValue)}</span>
+                <span className="w-px h-3 bg-gray-300 inline-block"></span>
+                <span>세액 {formatCurrency(taxAmount)}</span>
+              </div>
+            )}
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] font-semibold text-gray-500">총 합계</p>
+            <p className="text-lg font-bold text-gray-900">₩{formatCurrency(totalAmount)}</p>
+          </div>
+        </div>
+
         {status === 'failed' && failureReason && (
-          <div className="mt-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-[11px] text-red-600">
-            실패 사유: {failureReason}
+          <div className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-[11px] text-red-600">
+            미처리 사유: {failureReason}
           </div>
         )}
       </div>
 
-      <div className="bg-white divide-y divide-gray-100">
-        {items.map((item) => {
-          const isItemEditing = editingId === item.id;
-          return isItemEditing 
-            ? <EditItem key={item.id} data={editForm} onChange={onChange} onCancel={onCancelEdit} onSave={onSaveEdit} />
-            : <ViewItem key={item.id} data={item} onEdit={() => onStartEdit(item)} disabled={isEditing && !isItemEditing} />;
-        })}
+      <div className="bg-white divide-y divide-gray-100 border-l border-gray-200">
+        {items.map((item) => (
+          <ViewItem 
+            key={item.id} 
+            data={item} 
+            onEdit={() => onStartEdit(item)} 
+            disabled={isEditing}
+          />
+        ))}
       </div>
     </div>
   );
@@ -1519,8 +1520,8 @@ function EditOverlay({
   onCancel, 
   onSave 
 }) {
+  const safeInvoiceId = invoiceId === INVOICE_B_ID ? INVOICE_B_ID : INVOICE_A_ID;
   const [isPipExpanded, setIsPipExpanded] = useState(false);
-  const imageData = getInvoiceImageData(invoiceId);
   
   const modeButtonClass = (mode) =>
     `px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
@@ -1575,7 +1576,7 @@ function EditOverlay({
             <div className="flex h-full flex-col">
               {isImageVisible && (
                 <div className="shrink-0 h-[30%] border-b border-gray-300">
-                  <ZoomableImage src={imageData.src} alt="거래명세서 이미지" maxScale={MAX_ZOOM_SCALE} className="bg-slate-800" />
+                  <EditImagePreview invoiceId={safeInvoiceId} />
                 </div>
               )}
               <div className="flex-1 overflow-y-auto">
@@ -1589,12 +1590,12 @@ function EditOverlay({
               {isImageVisible && (
                 <div className={`shrink-0 border-b border-gray-300 transition-all duration-300 ${isImageCollapsed ? 'h-12' : 'h-[30%]'}`}>
                   {isImageCollapsed ? (
-                    <div className="flex h-full items-center justify-between px-4 bg-slate-700">
-                      <span className="text-xs font-semibold text-white/80">거래명세서 이미지</span>
-                      <button onClick={onToggleImageCollapse} className="text-xs font-semibold text-blue-300">펼치기</button>
+                    <div className="flex h-full items-center justify-between px-4">
+                      <span className="text-xs font-semibold text-gray-600">거래명세서 이미지</span>
+                      <button onClick={onToggleImageCollapse} className="text-xs font-semibold text-blue-600">펼치기</button>
                     </div>
                   ) : (
-                    <ZoomableImage src={imageData.src} alt="거래명세서 이미지" maxScale={MAX_ZOOM_SCALE} className="bg-slate-800" />
+                    <EditImagePreview invoiceId={safeInvoiceId} />
                   )}
                 </div>
               )}
@@ -1606,12 +1607,12 @@ function EditOverlay({
 
           {viewMode === 'C' && (
             <div className="relative h-full">
-              <div className={`h-full overflow-y-auto pb-32 ${isImageVisible ? pipPaddingClass : ''}`}>
+              <div className={`h-full overflow-y-auto pb-32 ${pipPaddingClass}`}>
                 <EditItem data={data} onChange={onChange} onCancel={onCancel} onSave={onSave} />
               </div>
               {isImageVisible && (
                 <div className={`absolute top-4 right-4 overflow-hidden rounded-2xl border border-gray-300 bg-slate-800 shadow-lg ${pipSizeClass}`}>
-                  <ZoomableImage src={imageData.src} alt="거래명세서 이미지" maxScale={MAX_ZOOM_SCALE} compact className="bg-slate-800" />
+                  <EditImagePreview invoiceId={safeInvoiceId} compact />
                   <button
                     type="button"
                     onClick={() => setIsPipExpanded(prev => !prev)}
@@ -1626,6 +1627,21 @@ function EditOverlay({
         </div>
       </div>
     </div>
+  );
+}
+
+function EditImagePreview({ invoiceId, compact = false }) {
+  const safeInvoiceId = invoiceId === INVOICE_B_ID ? INVOICE_B_ID : INVOICE_A_ID;
+  const imageData = getInvoiceImageData(safeInvoiceId);
+
+  return (
+    <ZoomableImage
+      src={imageData.src}
+      alt="거래명세서 이미지"
+      maxScale={MAX_ZOOM_SCALE}
+      compact={compact}
+      className="bg-slate-800"
+    />
   );
 }
 
@@ -1683,21 +1699,14 @@ function ViewItem({ data, onEdit, disabled }) {
 // EDIT ITEM COMPONENT (Edit Mode)
 // =================================================================================================
 function EditItem({ data, onChange, onCancel, onSave }) {
-  const itemRef = useRef(null);
   const total = data.qty * data.price;
-
-  useEffect(() => {
-    if (itemRef.current) {
-      setTimeout(() => itemRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
-    }
-  }, []);
 
   const handleFocus = (e) => {
     setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 400);
   };
 
   return (
-    <div ref={itemRef} className="p-4 bg-blue-50/50 border-l-4 border-blue-600 animate-fade-in scroll-mt-32">
+    <div className="p-4 bg-blue-50/50 border-l-4 border-blue-600 animate-fade-in scroll-mt-32">
       <div className="flex justify-between items-center mb-3 sticky top-0 z-10 bg-blue-50/95 py-2">
         <h3 className="text-sm font-bold text-gray-800 truncate pr-2">{data.name}</h3>
         <div className="flex gap-2 shrink-0">
@@ -1705,7 +1714,7 @@ function EditItem({ data, onChange, onCancel, onSave }) {
             <X className="w-3 h-3 inline-block -mt-0.5 mr-1" />취소
           </button>
           <button onClick={onSave} className="whitespace-nowrap px-3 py-1 text-xs font-semibold text-white bg-blue-600 rounded-full shadow-sm">
-            <Save className="w-3 h-3 inline-block -mt-0.5 mr-1" />저장
+            <Save className="w-3 h-3 inline-block -mt-0.5 mr-1" />저장 완료
           </button>
         </div>
       </div>
