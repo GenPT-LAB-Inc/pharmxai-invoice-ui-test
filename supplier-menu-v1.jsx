@@ -17,7 +17,6 @@ import {
   RotateCcw,
   Eye,
   EyeOff,
-  Minimize2,
   FileText,
   Filter,
   ArrowUpDown,
@@ -48,6 +47,17 @@ const INVOICE_SUMMARIES = [
     itemCount: 3,        // 품목 종류 수
     totalQty: 15,        // 총 수량
     totalAmount: 297500,
+    status: 'completed',
+    taxType: 'separate'
+  },
+  {
+    id: 'INV-2026-008',
+    supplierId: 'vitaminhouse',
+    supplierName: '비타민하우스',
+    date: '2026-01-06',
+    itemCount: 2,
+    totalQty: 8,
+    totalAmount: 164000,
     status: 'completed',
     taxType: 'separate'
   },
@@ -122,6 +132,7 @@ const INVOICE_SUMMARIES = [
 // --- Mock Data: Invoice Details ---
 const INVOICE_A_ID = 'INV-2026-001';
 const INVOICE_B_ID = 'INV-2026-002';
+const INVOICE_C_ID = 'INV-2026-008';
 
 const INVOICE_META = {
   [INVOICE_A_ID]: { 
@@ -212,6 +223,34 @@ const INITIAL_DETAIL_ITEMS = [
     lot: 'C998877', 
     expiry: '2026-12-31', 
     note: '매대진열', 
+    isLotMissing: false
+  },
+  {
+    id: 7,
+    invoiceId: INVOICE_C_ID,
+    invoiceName: '비타민하우스 | 2026-008',
+    status: 'completed',
+    name: '오메가3 프리미엄',
+    standard: '1,000mgX60캡슐',
+    qty: 3,
+    price: 32000,
+    lot: 'V203111',
+    expiry: '2027-09-30',
+    note: '',
+    isLotMissing: false
+  },
+  {
+    id: 8,
+    invoiceId: INVOICE_C_ID,
+    invoiceName: '비타민하우스 | 2026-008',
+    status: 'completed',
+    name: '멀티비타민 미네랄',
+    standard: '500mgX90정',
+    qty: 5,
+    price: 13600,
+    lot: 'V203112',
+    expiry: '2028-02-15',
+    note: '',
     isLotMissing: false
   },
   {
@@ -556,7 +595,7 @@ function ZoomableImage({ src, alt, maxScale = MAX_ZOOM_SCALE, compact = false, c
 // =================================================================================================
 export default function SupplierManagementApp({ onMenuChange }) {
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'detail'
-  const [selectedInvoiceId, setSelectedInvoiceId] = useState(null);
+  const [selectedSupplierContext, setSelectedSupplierContext] = useState(null);
   const [isCameraFlowOpen, setIsCameraFlowOpen] = useState(false);
   const [isNotiOpen, setIsNotiOpen] = useState(false);
   const [notiTab, setNotiTab] = useState('all');
@@ -567,14 +606,14 @@ export default function SupplierManagementApp({ onMenuChange }) {
   const [searchQuery, setSearchQuery] = useState('');
 
   // --- Navigation Handlers ---
-  const handleSelectInvoice = (id) => {
-    setSelectedInvoiceId(id);
+  const handleSelectInvoice = (context) => {
+    setSelectedSupplierContext(context);
     setViewMode('detail');
   };
 
   const handleBackToList = () => {
     setViewMode('list');
-    setSelectedInvoiceId(null);
+    setSelectedSupplierContext(null);
   };
 
   const openCameraFlow = () => {
@@ -691,7 +730,7 @@ export default function SupplierManagementApp({ onMenuChange }) {
         {viewMode === 'list' ? (
           <SupplierListView onSelectInvoice={handleSelectInvoice} />
         ) : (
-          <InvoiceDetailView invoiceId={selectedInvoiceId} onBack={handleBackToList} />
+          <InvoiceDetailView supplierContext={selectedSupplierContext} onBack={handleBackToList} />
         )}
       </div>
 
@@ -1230,7 +1269,14 @@ function SupplierListView({ onSelectInvoice }) {
               supplierStats.map(supplier => (
                 <div 
                   key={supplier.supplierId} 
-                  onClick={() => onSelectInvoice(supplier.supplierId)}
+                  onClick={() => onSelectInvoice({
+                    supplierId: supplier.supplierId,
+                    supplierName: supplier.supplierName,
+                    dateRangeType,
+                    selectedMonth,
+                    startDate,
+                    endDate
+                  })}
                   className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 active:bg-gray-50 transition-colors cursor-pointer"
                 >
                   {/* 공급사명 헤더 */}
@@ -1279,52 +1325,107 @@ function SupplierListView({ onSelectInvoice }) {
 // =================================================================================================
 // 2. INVOICE DETAIL VIEW
 // =================================================================================================
-function InvoiceDetailView({ invoiceId, onBack }) {
-  const activeId = invoiceId || INVOICE_A_ID;
-  
-  // Find initial data that belongs to this invoice
-  const initialItems = INITIAL_DETAIL_ITEMS.filter(item => {
-    if (activeId === INVOICE_A_ID) return item.invoiceId === INVOICE_A_ID;
-    if (activeId === INVOICE_B_ID) return item.invoiceId === INVOICE_B_ID;
-    return item.invoiceId === INVOICE_A_ID;
-  });
+function InvoiceDetailView({ supplierContext, onBack }) {
+  const supplierId = supplierContext?.supplierId ?? 'all';
+  const supplierName = supplierContext?.supplierName ?? '공급사 상세';
+  const dateRangeType = supplierContext?.dateRangeType ?? 'month';
+  const selectedMonth = supplierContext?.selectedMonth ?? '2026-01';
+  const startDate = supplierContext?.startDate ?? '2026-01-01';
+  const endDate = supplierContext?.endDate ?? '2026-01-31';
 
-  const [items, setItems] = useState(initialItems);
+  const [items, setItems] = useState(INITIAL_DETAIL_ITEMS);
   const [editingId, setEditingId] = useState(null);
+  const [editingInvoiceId, setEditingInvoiceId] = useState(null);
   const [editForm, setEditForm] = useState({});
-  const [isImageViewVisible, setIsImageViewVisible] = useState(false);
   const [editViewMode, setEditViewMode] = useState('A');
   const [isEditImageVisible, setIsEditImageVisible] = useState(true);
   const [isEditImageCollapsed, setIsEditImageCollapsed] = useState(false);
-  
-  // Meta data
-  const meta = INVOICE_META[activeId] || INVOICE_META['default'];
-  const imageData = getInvoiceImageData(activeId);
-  const title = activeId === INVOICE_A_ID ? '비타민하우스 | 2026-001' : '(주)녹십자 | 2026-002';
-  
-  // Computed
+  const [expandedInvoiceIds, setExpandedInvoiceIds] = useState({});
+  const [imageVisibilityById, setImageVisibilityById] = useState({});
+
+  useEffect(() => {
+    setExpandedInvoiceIds({});
+    setImageVisibilityById({});
+  }, [supplierId, dateRangeType, selectedMonth, startDate, endDate]);
+
+  const filteredSummaries = useMemo(() => {
+    let data = INVOICE_SUMMARIES;
+
+    if (supplierId && supplierId !== 'all') {
+      data = data.filter(item => item.supplierId === supplierId);
+    }
+
+    if (dateRangeType === 'month') {
+      data = data.filter(item => item.date.startsWith(selectedMonth));
+    } else {
+      data = data.filter(item => item.date >= startDate && item.date <= endDate);
+    }
+
+    return data;
+  }, [supplierId, dateRangeType, selectedMonth, startDate, endDate]);
+
+  const groupedInvoices = useMemo(() => {
+    const grouped = filteredSummaries.reduce((acc, invoice) => {
+      if (!acc[invoice.date]) {
+        acc[invoice.date] = [];
+      }
+      acc[invoice.date].push(invoice);
+      return acc;
+    }, {});
+
+    return Object.keys(grouped)
+      .sort((a, b) => b.localeCompare(a))
+      .map(date => ({
+        date,
+        invoices: grouped[date].sort((a, b) => a.id.localeCompare(b.id))
+      }));
+  }, [filteredSummaries]);
+
+  const itemsByInvoiceId = useMemo(() => {
+    return items.reduce((acc, item) => {
+      if (!acc[item.invoiceId]) {
+        acc[item.invoiceId] = [];
+      }
+      acc[item.invoiceId].push(item);
+      return acc;
+    }, {});
+  }, [items]);
+
   const isEditing = editingId !== null;
-  
-  // Determine height class based on state
-  const imageContainerHeightClass = useMemo(() => {
-    if (!isImageViewVisible) return 'h-0 border-b-0'; 
-    return 'h-[45%] border-b border-gray-400'; 
-  }, [isImageViewVisible]);
+  const dateLabel = dateRangeType === 'month'
+    ? selectedMonth.replace('-', '.')
+    : `${startDate.slice(5).replace('-', '.')}~${endDate.slice(5).replace('-', '.')}`;
 
-  // Calculations
-  const totalAmount = items.reduce((acc, item) => acc + (item.qty * item.price), 0);
+  const handleToggleExpand = (invoiceId) => {
+    setExpandedInvoiceIds(prev => ({ ...prev, [invoiceId]: !prev[invoiceId] }));
+  };
 
-  // Handlers
+  const handleToggleImage = (invoiceId) => {
+    setImageVisibilityById(prev => {
+      const nextValue = !prev[invoiceId];
+      if (nextValue) {
+        setExpandedInvoiceIds(prevExpanded => ({ ...prevExpanded, [invoiceId]: true }));
+      }
+      return { ...prev, [invoiceId]: nextValue };
+    });
+  };
+
   const handleEditStart = (item) => { 
     setEditingId(item.id); 
+    setEditingInvoiceId(item.invoiceId);
     setEditForm({...item}); 
     setIsEditImageVisible(true);
     setIsEditImageCollapsed(false);
   };
-  const handleEditCancel = () => { setEditingId(null); setEditForm({}); };
+  const handleEditCancel = () => { 
+    setEditingId(null);
+    setEditingInvoiceId(null);
+    setEditForm({});
+  };
   const handleEditSave = () => {
     setItems(prev => prev.map(i => i.id === editingId ? editForm : i));
     setEditingId(null);
+    setEditingInvoiceId(null);
     setEditForm({});
   };
   const handleInputChange = (f, v) => setEditForm(prev => ({...prev, [f]: v}));
@@ -1334,73 +1435,87 @@ function InvoiceDetailView({ invoiceId, onBack }) {
       
       {/* Detail Toolbar (Sub Header) */}
       <div className="bg-white px-4 py-2 flex items-center justify-between border-b border-gray-100 shrink-0">
-        <div className="flex items-center gap-1 text-gray-700 font-medium text-sm">
-          <Calendar className="w-4 h-4 text-gray-500" />
-          <span>2026.01.06 (화)</span>
+        <div className="flex items-center gap-2 text-gray-700 font-medium text-sm">
+          <Building2 className="w-4 h-4 text-blue-600" />
+          <span>{supplierName}</span>
         </div>
-        <div className="flex gap-2">
-           <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded">상세조회</span>
+        <div className="flex items-center gap-1 text-gray-500 text-xs">
+          <Calendar className="w-4 h-4" />
+          <span>{dateLabel}</span>
         </div>
       </div>
 
-      {/* Split View */}
-      <div className="flex flex-col flex-1 overflow-hidden relative">
-        
-        {/* Top: Image Viewer */}
-        <div className={`bg-slate-800 w-full relative transition-all duration-500 ease-in-out shrink-0 overflow-hidden flex items-center justify-center ${imageContainerHeightClass}`}>
-          <ZoomableImage
-            key={imageData.src}
-            src={imageData.src}
-            alt="거래명세서 이미지"
-            maxScale={MAX_ZOOM_SCALE}
-            className="bg-slate-800"
-          />
-          {!isEditing && isImageViewVisible && (
-            <button 
-              onClick={() => setIsImageViewVisible(false)} 
-              className="absolute top-2 right-2 p-1.5 bg-black/20 hover:bg-black/40 text-white/70 rounded-full transition-colors"
-            >
-              <Minimize2 className="w-4 h-4" />
-            </button>
-          )}
-        </div>
+      {/* Detail List */}
+      <div className="flex-1 overflow-y-auto bg-gray-50">
+        {groupedInvoices.length === 0 ? (
+          <div className="py-20 text-center text-sm text-gray-400">
+            선택한 조건에 해당하는 거래명세서가 없습니다.
+          </div>
+        ) : (
+          groupedInvoices.map(group => (
+            <div key={group.date} className="px-4 pt-4">
+              <div className="flex items-center gap-3 text-xs font-semibold text-gray-500">
+                <span className="h-2 w-2 rounded-full bg-blue-500"></span>
+                <span>{formatDate(group.date)}</span>
+                <div className="flex-1 h-px bg-gray-200"></div>
+              </div>
 
-        {/* Bottom: List */}
-        <div className="flex-1 overflow-y-auto bg-gray-50 scroll-smooth transition-all">
-           <InvoiceSection 
-             invoiceId={activeId}
-             title={title}
-             status={meta.status}
-             totalAmount={totalAmount}
-             taxAmount={meta.taxAmount}
-             hasSeparateTax={meta.hasSeparateTax}
-             items={items}
-             failureReason={meta.failureReason}
-             isEditing={isEditing}
-             isImageVisible={isImageViewVisible}
-             onToggleImage={() => setIsImageViewVisible(!isImageViewVisible)}
-             onStartEdit={handleEditStart}
-           />
-           <div className={`transition-all duration-300 ${isEditing ? 'h-[350px]' : 'h-24'}`}></div>
-        </div>
+              <div className="mt-3 space-y-4 pb-4">
+                {group.invoices.map(invoice => {
+                  const invoiceMeta = INVOICE_META[invoice.id];
+                  const invoiceNumber = invoice.id.replace('INV-', '');
+                  const title = `${invoice.supplierName} | ${invoiceNumber}`;
+                  const hasSeparateTax = invoiceMeta?.hasSeparateTax ?? invoice.taxType === 'separate';
+                  const taxAmount = invoiceMeta?.taxAmount ?? (hasSeparateTax ? Math.round(invoice.totalAmount * 0.1) : 0);
+                  const status = invoice.status || invoiceMeta?.status || 'completed';
+                  const failureReason = invoiceMeta?.failureReason || '';
+                  const invoiceItems = itemsByInvoiceId[invoice.id] || [];
+                  const isExpanded = !!expandedInvoiceIds[invoice.id];
+                  const isImageVisible = !!imageVisibilityById[invoice.id];
 
-        {/* Edit Overlay */}
-        {isEditing && (
-          <EditOverlay 
-            data={editForm}
-            invoiceId={activeId}
-            viewMode={editViewMode}
-            onViewModeChange={setEditViewMode}
-            isImageVisible={isEditImageVisible}
-            onToggleImage={() => setIsEditImageVisible(prev => !prev)}
-            isImageCollapsed={isEditImageCollapsed}
-            onToggleImageCollapse={() => setIsEditImageCollapsed(prev => !prev)}
-            onChange={handleInputChange}
-            onCancel={handleEditCancel}
-            onSave={handleEditSave}
-          />
+                  return (
+                    <InvoiceSection 
+                      key={invoice.id}
+                      invoiceId={invoice.id}
+                      title={title}
+                      status={status}
+                      totalAmount={invoice.totalAmount}
+                      taxAmount={taxAmount}
+                      hasSeparateTax={hasSeparateTax}
+                      items={invoiceItems}
+                      failureReason={failureReason}
+                      isEditing={isEditing}
+                      isExpanded={isExpanded}
+                      isImageVisible={isImageVisible}
+                      onToggleExpand={() => handleToggleExpand(invoice.id)}
+                      onToggleImage={() => handleToggleImage(invoice.id)}
+                      onStartEdit={handleEditStart}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ))
         )}
+        <div className={`transition-all duration-300 ${isEditing ? 'h-[350px]' : 'h-20'}`}></div>
       </div>
+
+      {/* Edit Overlay */}
+      {isEditing && (
+        <EditOverlay 
+          data={editForm}
+          invoiceId={editingInvoiceId}
+          viewMode={editViewMode}
+          onViewModeChange={setEditViewMode}
+          isImageVisible={isEditImageVisible}
+          onToggleImage={() => setIsEditImageVisible(prev => !prev)}
+          isImageCollapsed={isEditImageCollapsed}
+          onToggleImageCollapse={() => setIsEditImageCollapsed(prev => !prev)}
+          onChange={handleInputChange}
+          onCancel={handleEditCancel}
+          onSave={handleEditSave}
+        />
+      )}
     </div>
   );
 }
@@ -1418,11 +1533,14 @@ function InvoiceSection({
   items, 
   failureReason,
   isEditing,
+  isExpanded,
   isImageVisible, 
   onToggleImage,
+  onToggleExpand,
   onStartEdit
 }) {
   const supplyValue = hasSeparateTax ? totalAmount - taxAmount : totalAmount;
+  const imageData = getInvoiceImageData(invoiceId);
   
   const getStatusBadge = (status) => {
     switch(status) {
@@ -1451,54 +1569,95 @@ function InvoiceSection({
   };
 
   return (
-    <div className={`mb-4 border-l-4 ${getStatusAccent(status)} pl-3`}>
-      <div className="bg-gray-50 sticky top-0 z-30 px-4 py-2 border-b-2 border-gray-200 shadow-sm flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {getStatusBadge(status)}
-            <span className="text-xs text-gray-400 font-medium">No. {title.split('|')[1]}</span>
+    <div className={`border-l-4 ${getStatusAccent(status)} pl-3`}>
+      <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+        <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {getStatusBadge(status)}
+              <span className="text-xs text-gray-400 font-medium">No. {title.split('|')[1]}</span>
+            </div>
+            <button 
+              onClick={onToggleImage}
+              disabled={isEditing}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
+                isImageVisible ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-gray-50 border-gray-200 text-gray-400'
+              } ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {isImageVisible ? <><Eye className="w-3 h-3" /> 거래명세서 보기 ON</> : <><EyeOff className="w-3 h-3" /> 거래명세서 보기 OFF</>}
+            </button>
           </div>
-          <button 
-            onClick={onToggleImage}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors border ${isImageVisible ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-gray-50 border-gray-200 text-gray-400'}`}
-          >
-            {isImageVisible ? <><Eye className="w-3 h-3" /> 거래명세서 보기 ON</> : <><EyeOff className="w-3 h-3" /> 거래명세서 보기 OFF</>}
-          </button>
+
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="text-base font-bold text-gray-900 truncate">{title.split('|')[0]}</h2>
+              {hasSeparateTax && (
+                <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-600">
+                  <span>공급가액 {formatCurrency(supplyValue)}</span>
+                  <span className="w-px h-3 bg-gray-300 inline-block"></span>
+                  <span>세액 {formatCurrency(taxAmount)}</span>
+                </div>
+              )}
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] font-semibold text-gray-500">총 합계</p>
+              <p className="text-lg font-bold text-gray-900">₩{formatCurrency(totalAmount)}</p>
+            </div>
+          </div>
+
+          {status === 'failed' && failureReason && (
+            <div className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-[11px] text-red-600">
+              미처리 사유: {failureReason}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={onToggleExpand}
+              disabled={isEditing}
+              className={`flex items-center gap-1 text-xs font-semibold ${
+                isExpanded ? 'text-blue-600' : 'text-gray-500'
+              } ${isEditing ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {isExpanded ? '제품 접기' : '제품 펼치기'}
+              <ChevronDown className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+            </button>
+            <span className="text-[10px] text-gray-400">품목 {items.length}개</span>
+          </div>
         </div>
 
-        <div className="flex items-end justify-between gap-3">
-          <div className="min-w-0">
-            <h2 className="text-base font-bold text-gray-900 truncate">{title.split('|')[0]}</h2>
-            {hasSeparateTax && (
-              <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-600">
-                <span>공급가액 {formatCurrency(supplyValue)}</span>
-                <span className="w-px h-3 bg-gray-300 inline-block"></span>
-                <span>세액 {formatCurrency(taxAmount)}</span>
+        {isExpanded && (
+          <div className="bg-white border-l border-gray-200">
+            {isImageVisible && (
+              <div className="h-52 border-b border-gray-200 bg-slate-800">
+                <ZoomableImage
+                  key={imageData.src}
+                  src={imageData.src}
+                  alt="거래명세서 이미지"
+                  maxScale={MAX_ZOOM_SCALE}
+                  className="bg-slate-800"
+                />
+              </div>
+            )}
+            {items.length === 0 ? (
+              <div className="px-4 py-6 text-center text-xs text-gray-400">
+                표시할 품목이 없습니다.
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-100">
+                {items.map((item) => (
+                  <ViewItem 
+                    key={item.id} 
+                    data={item} 
+                    onEdit={() => onStartEdit(item)} 
+                    disabled={isEditing}
+                  />
+                ))}
               </div>
             )}
           </div>
-          <div className="text-right">
-            <p className="text-[10px] font-semibold text-gray-500">총 합계</p>
-            <p className="text-lg font-bold text-gray-900">₩{formatCurrency(totalAmount)}</p>
-          </div>
-        </div>
-
-        {status === 'failed' && failureReason && (
-          <div className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-[11px] text-red-600">
-            미처리 사유: {failureReason}
-          </div>
         )}
-      </div>
-
-      <div className="bg-white divide-y divide-gray-100 border-l border-gray-200">
-        {items.map((item) => (
-          <ViewItem 
-            key={item.id} 
-            data={item} 
-            onEdit={() => onStartEdit(item)} 
-            disabled={isEditing}
-          />
-        ))}
       </div>
     </div>
   );
