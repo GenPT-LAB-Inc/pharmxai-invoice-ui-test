@@ -1569,10 +1569,23 @@ function InvoiceSection({
     }
   };
 
+  const getHeaderTone = (status) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-50/70';
+      case 'analyzing':
+        return 'bg-blue-50/70';
+      case 'failed':
+        return 'bg-red-50/70';
+      default:
+        return 'bg-gray-50';
+    }
+  };
+
   return (
     <div className={`border-l-4 ${getStatusAccent(status)} pl-3`}>
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-        <div className="bg-gray-50 px-4 py-1.5 border-b border-gray-200 flex flex-col gap-1.5">
+        <div className={`px-4 py-1.5 border-b border-gray-200 flex flex-col gap-1.5 ${getHeaderTone(status)}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {getStatusBadge(status)}
