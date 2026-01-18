@@ -538,7 +538,14 @@ export default function ExpiryCheckApp({ onMenuChange }) {
     <div className="flex flex-col h-screen bg-gray-100 font-sans max-w-md mx-auto shadow-2xl overflow-hidden border-x border-gray-200">
       <header className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-200 z-50 shadow-sm shrink-0">
         <div className="flex items-center gap-2">
-          <h1 className="text-lg font-bold text-blue-900 tracking-tight">PharmxAI</h1>
+          <button
+            type="button"
+            onClick={() => onMenuChange?.('dashboard')}
+            aria-label="대시보드로 이동"
+            className="rounded-lg p-1 -ml-1 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
+          >
+            <span className="text-lg font-bold text-blue-900 tracking-tight">PharmxAI</span>
+          </button>
           <span className="text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
             유효기간 점검
           </span>
@@ -753,7 +760,9 @@ export default function ExpiryCheckApp({ onMenuChange }) {
                   key={label}
                   type="button"
                   onClick={() => {
-                    if (label === '거래명세서 관리' && onMenuChange) {
+                    if (label === '대시보드' && onMenuChange) {
+                      onMenuChange('dashboard');
+                    } else if (label === '거래명세서 관리' && onMenuChange) {
                       onMenuChange('invoice');
                     } else if (label === '공급사 관리' && onMenuChange) {
                       onMenuChange('supplier');

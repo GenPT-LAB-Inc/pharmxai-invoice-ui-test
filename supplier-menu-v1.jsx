@@ -686,7 +686,14 @@ export default function SupplierManagementApp({ onMenuChange }) {
           /* List Mode Header */
           <div className="flex items-center justify-between w-full animate-fade-in">
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-blue-900 tracking-tight">PharmxAI</h1>
+              <button
+                type="button"
+                onClick={() => onMenuChange?.('dashboard')}
+                aria-label="대시보드로 이동"
+                className="rounded-lg p-1 -ml-1 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
+              >
+                <span className="text-lg font-bold text-blue-900 tracking-tight">PharmxAI</span>
+              </button>
               <span className="text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded">공급사 관리</span>
             </div>
             <div className="flex gap-4">
@@ -870,11 +877,15 @@ export default function SupplierManagementApp({ onMenuChange }) {
                   key={label}
                   type="button"
                   onClick={() => {
-                    if (label === '거래명세서 관리' && onMenuChange) {
+                    if (label === '대시보드' && onMenuChange) {
+                      onMenuChange('dashboard');
+                    } else if (label === '거래명세서 관리' && onMenuChange) {
                       onMenuChange('invoice');
                     } else if (label === '유효기간 점검' && onMenuChange) {
                       onMenuChange('expiry');
                     } else if (label === '공급사 관리') {
+                      closeMenuPanel();
+                    } else {
                       closeMenuPanel();
                     }
                   }}
