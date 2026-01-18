@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 
 const BASE_DATE = '2026-01-06';
-const BASE_DATE_LABEL = '2026.01.06 (화)';
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 const SUPPLIER_OPTIONS = [
@@ -441,9 +440,6 @@ export default function ExpiryCheckApp({ onMenuChange }) {
     }, {});
   }, [groupedItems]);
 
-  const totalCount = visibleItems.length;
-  const totalQty = visibleItems.reduce((acc, item) => acc + item.qty, 0);
-
   const unreadCount = notifications.filter((item) => item.unread).length;
   const visibleNotifications = notifications.filter((item) =>
     notiTab === 'unread' ? item.unread : true
@@ -591,82 +587,70 @@ export default function ExpiryCheckApp({ onMenuChange }) {
       <div className="flex-1 overflow-hidden">
         <div className="flex h-full flex-col">
           <div className="bg-gray-50 px-4 py-2 border-b border-gray-100">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex flex-col gap-2">
-                <div
-                  className="relative inline-flex"
-                  tabIndex={0}
-                  onBlur={handleSupplierBlur}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setIsSupplierOpen((prev) => !prev)}
-                    className="flex items-center gap-2 text-gray-700 font-semibold text-sm bg-white px-2 py-1 rounded-md border border-gray-200 shadow-sm"
-                  >
-                    <span>
-                      {SUPPLIER_OPTIONS.find((option) => option.id === selectedSupplier)
-                        ?.label || '전체 공급사'}
-                    </span>
-                    <ChevronDown
-                      className={`w-3 h-3 text-gray-400 transition-transform ${
-                        isSupplierOpen ? 'rotate-180' : ''
+            <div className="flex items-center gap-2">
+              <div className="flex flex-wrap gap-2">
+                {STATUS_FILTERS.map((filter) => {
+                  const isActive = statusFilter === filter.id;
+                  const count = statusCounts[filter.id] || 0;
+                  return (
+                    <button
+                      key={filter.id}
+                      type="button"
+                      onClick={() => setStatusFilter(filter.id)}
+                      className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+                        isActive
+                          ? 'border-blue-200 bg-blue-50 text-blue-600'
+                          : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
                       }`}
-                    />
-                  </button>
-                  {isSupplierOpen && (
-                    <div className="absolute left-0 top-full mt-2 w-44 rounded-xl border border-gray-200 bg-white p-2 shadow-lg z-10">
-                      {SUPPLIER_OPTIONS.map((option) => (
-                        <button
-                          key={option.id}
-                          type="button"
-                          onClick={() => {
-                            setSelectedSupplier(option.id);
-                            setIsSupplierOpen(false);
-                          }}
-                          className={`w-full rounded-lg px-3 py-2 text-left text-sm font-semibold ${
-                            option.id === selectedSupplier
-                              ? 'bg-blue-50 text-blue-600'
-                              : 'text-gray-700 hover:bg-gray-50'
-                          }`}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <p className="text-[10px] text-gray-400">기준일</p>
-                  <p className="text-xs font-semibold text-gray-700">{BASE_DATE_LABEL}</p>
-                </div>
+                    >
+                      {filter.label}
+                      <span className="ml-1 text-[10px] font-bold">{count}</span>
+                    </button>
+                  );
+                })}
               </div>
-              <div className="text-right">
-                <p className="text-[10px] text-gray-400">총 품목 · 수량</p>
-                <p className="text-sm font-bold text-gray-900">
-                  {totalCount}건 · {totalQty}개
-                </p>
-              </div>
-            </div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {STATUS_FILTERS.map((filter) => {
-                const isActive = statusFilter === filter.id;
-                const count = statusCounts[filter.id] || 0;
-                return (
-                  <button
-                    key={filter.id}
-                    type="button"
-                    onClick={() => setStatusFilter(filter.id)}
-                    className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
-                      isActive
-                        ? 'border-blue-200 bg-blue-50 text-blue-600'
-                        : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
+              <div
+                className="relative ml-auto inline-flex shrink-0"
+                tabIndex={0}
+                onBlur={handleSupplierBlur}
+              >
+                <button
+                  type="button"
+                  onClick={() => setIsSupplierOpen((prev) => !prev)}
+                  className="flex items-center gap-2 text-gray-700 font-semibold text-sm bg-white px-2 py-1 rounded-md border border-gray-200 shadow-sm"
+                >
+                  <span>
+                    {SUPPLIER_OPTIONS.find((option) => option.id === selectedSupplier)
+                      ?.label || '전체 공급사'}
+                  </span>
+                  <ChevronDown
+                    className={`w-3 h-3 text-gray-400 transition-transform ${
+                      isSupplierOpen ? 'rotate-180' : ''
                     }`}
-                  >
-                    {filter.label}
-                    <span className="ml-1 text-[10px] font-bold">{count}</span>
-                  </button>
-                );
-              })}
+                  />
+                </button>
+                {isSupplierOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-44 rounded-xl border border-gray-200 bg-white p-2 shadow-lg z-10">
+                    {SUPPLIER_OPTIONS.map((option) => (
+                      <button
+                        key={option.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedSupplier(option.id);
+                          setIsSupplierOpen(false);
+                        }}
+                        className={`w-full rounded-lg px-3 py-2 text-left text-sm font-semibold ${
+                          option.id === selectedSupplier
+                            ? 'bg-blue-50 text-blue-600'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
             <div className="mt-2 flex items-center justify-between">
               <p className="text-[10px] text-gray-400">그룹 요약</p>
