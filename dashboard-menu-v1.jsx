@@ -1,10 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import {
-  BarChart3,
   Bell,
   Camera,
   ChevronDown,
-  Info,
   Menu,
   Search,
 } from 'lucide-react';
@@ -45,6 +43,55 @@ const WEEKLY_UPLOAD_SUMMARY = [
     total: 2,
     counts: { analyzing: 1, completed: 1, failed: 0 },
   },
+];
+
+const REPORT_MONTH_KEYS = [
+  '2025-08',
+  '2025-09',
+  '2025-10',
+  '2025-11',
+  '2025-12',
+  '2026-01',
+];
+const YOY_MONTH_KEYS = [
+  '2024-08',
+  '2024-09',
+  '2024-10',
+  '2024-11',
+  '2024-12',
+  '2025-01',
+];
+
+const MONTHLY_PURCHASE_METRICS = {
+  amount: {
+    current: [18500000, 20400000, 19850000, 22100000, 23800000, 24750000],
+    previous: [16900000, 17500000, 18200000, 19500000, 20100000, 21000000],
+  },
+  itemCount: {
+    current: [210, 225, 234, 240, 250, 262],
+    previous: [198, 205, 212, 222, 230, 235],
+  },
+  quantity: {
+    current: [3200, 3450, 3380, 3550, 3680, 3920],
+    previous: [3050, 3100, 3150, 3220, 3300, 3450],
+  },
+};
+
+const SUPPLIER_SHARE_AMOUNT_6M = [
+  { id: 'vitaminhouse', label: '비타민하우스', amount: 42000000 },
+  { id: 'gc', label: '(주)녹십자', amount: 31000000 },
+  { id: 'yuhan', label: '(주)유한양행', amount: 24000000 },
+  { id: 'chong', label: '종근당', amount: 18000000 },
+  { id: 'others', label: '기타', amount: 14400000 },
+];
+
+const PRODUCT_SHARE_AMOUNT_TOP5_6M = [
+  { id: 'taxen', label: '탁센 연질캡슐', amount: 19000000 },
+  { id: 'bmax', label: '비맥스 메타정', amount: 16000000 },
+  { id: 'scfa', label: '단쇄지방산 SCFA455', amount: 14000000 },
+  { id: 'omega', label: '프리미엄 오메가3', amount: 12500000 },
+  { id: 'nmn', label: '미라클 프로젝트 NMN250', amount: 11000000 },
+  { id: 'others', label: '기타', amount: 56900000 },
 ];
 
 const SEARCH_ITEMS = [
@@ -137,6 +184,36 @@ const STATUS_TONE = {
   failed: 'bg-red-50 text-red-600 border-red-200',
 };
 
+const DONUT_COLORS = [
+  { strokeClass: 'stroke-blue-500', dotClass: 'bg-blue-500' },
+  { strokeClass: 'stroke-emerald-500', dotClass: 'bg-emerald-500' },
+  { strokeClass: 'stroke-amber-500', dotClass: 'bg-amber-500' },
+  { strokeClass: 'stroke-violet-500', dotClass: 'bg-violet-500' },
+  { strokeClass: 'stroke-slate-500', dotClass: 'bg-slate-500' },
+  { strokeClass: 'stroke-gray-400', dotClass: 'bg-gray-400' },
+];
+
+const CHART_THEMES = {
+  blue: {
+    currentBar:
+      'bg-gradient-to-t from-blue-600 via-blue-500 to-blue-400 shadow-sm shadow-blue-200',
+    previousBar: 'bg-gradient-to-t from-blue-200 to-blue-100',
+    lineStroke: 'stroke-blue-700',
+  },
+  indigo: {
+    currentBar:
+      'bg-gradient-to-t from-indigo-600 via-indigo-500 to-indigo-400 shadow-sm shadow-indigo-200',
+    previousBar: 'bg-gradient-to-t from-indigo-200 to-indigo-100',
+    lineStroke: 'stroke-indigo-700',
+  },
+  emerald: {
+    currentBar:
+      'bg-gradient-to-t from-emerald-600 via-emerald-500 to-emerald-400 shadow-sm shadow-emerald-200',
+    previousBar: 'bg-gradient-to-t from-emerald-200 to-emerald-100',
+    lineStroke: 'stroke-emerald-700',
+  },
+};
+
 const formatDateLabel = (value) => {
   const date = new Date(`${value}T00:00:00`);
   const year = date.getFullYear();
@@ -172,6 +249,272 @@ const getStatusLabel = (status) => {
   }
 };
 
+const formatNumber = (value) => new Intl.NumberFormat('ko-KR').format(Math.round(value));
+
+const formatKrw = (value) => `₩${formatNumber(value)}`;
+
+const formatKrwCompact = (value) => {
+  const sign = value < 0 ? '-' : '';
+  const abs = Math.abs(value);
+
+  if (abs >= 100000000) {
+    return `${sign}₩${(abs / 100000000).toFixed(1)}억`;
+  }
+
+  if (abs >= 10000) {
+    return `${sign}₩${formatNumber(Math.round(abs / 10000))}만`;
+  }
+
+  return `${sign}₩${formatNumber(abs)}`;
+};
+
+const formatMonthLabel = (monthKey) => {
+  const [, mm] = monthKey.split('-');
+  return `${Number(mm)}월`;
+};
+
+const formatMonthRangeLabel = (monthKeys) => {
+  if (!monthKeys?.length) return '';
+  const start = monthKeys[0].replace('-', '.');
+  const end = monthKeys[monthKeys.length - 1].replace('-', '.');
+  return `${start}~${end}`;
+};
+
+const sumValues = (values) => values.reduce((acc, value) => acc + value, 0);
+
+const cumulativeValues = (values) => {
+  let running = 0;
+  return values.map((value) => {
+    running += value;
+    return running;
+  });
+};
+
+const formatYoYChange = (current, previous) => {
+  if (!previous) return '—';
+  const delta = (current - previous) / previous;
+  const sign = delta >= 0 ? '+' : '';
+  return `${sign}${(delta * 100).toFixed(1)}%`;
+};
+
+function StatToggle({ active, label, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+        active
+          ? 'border-blue-200 bg-blue-50 text-blue-600'
+          : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
+function BarCumulativeChart({
+  months,
+  currentValues,
+  previousValues,
+  showPrevious,
+  showCumulative,
+  theme = 'blue',
+  heightClass = 'h-28',
+  showXAxisLabels = true,
+  showYAxisLabels = false,
+  yAxisLabelFormatter,
+}) {
+  const themeStyles = CHART_THEMES[theme] || CHART_THEMES.blue;
+  const cumulative = showCumulative ? cumulativeValues(currentValues) : [];
+  const valuesForMax = [
+    ...currentValues,
+    ...(showPrevious ? previousValues : []),
+    ...(showCumulative ? cumulative : []),
+  ];
+  const maxValue = Math.max(...valuesForMax, 1);
+  const labelFormatter = yAxisLabelFormatter || formatNumber;
+  const yAxisLabels = showYAxisLabels
+    ? [
+        Math.round(maxValue),
+        Math.round(maxValue * 0.66),
+        Math.round(maxValue * 0.33),
+        0,
+      ]
+    : [];
+
+  const barHeightPct = (value) => {
+    if (value <= 0) return 0;
+    const pct = (value / maxValue) * 100;
+    return Math.max(pct, 2);
+  };
+
+  const linePoints = showCumulative
+    ? cumulative.map((value, index) => {
+        const x = ((index + 0.5) / months.length) * 100;
+        const y = 100 - (value / maxValue) * 100;
+        return { x, y };
+      })
+    : [];
+  const linePath = linePoints
+    .map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`)
+    .join(' ');
+
+  return (
+    <div>
+      <div
+        className={`relative ${heightClass} rounded-xl border border-gray-100 bg-gradient-to-b from-gray-50 via-white to-white`}
+      >
+        {showYAxisLabels && (
+          <div className="absolute left-2 top-2 bottom-2 z-30 flex flex-col justify-between text-[9px] text-gray-400">
+            {yAxisLabels.map((value, idx) => (
+              <span key={`${value}-${idx}`}>{labelFormatter(value)}</span>
+            ))}
+          </div>
+        )}
+        <div
+          className={`absolute inset-0 ${showYAxisLabels ? 'pl-10 pr-3' : 'px-3'} py-2`}
+        >
+          <div className="relative h-full">
+            <div className="absolute inset-0 z-0 flex flex-col justify-between">
+              {[0, 1, 2, 3].map((idx) => (
+                <div
+                  key={idx}
+                  className="h-px bg-gradient-to-r from-gray-200/70 via-gray-100/70 to-transparent"
+                ></div>
+              ))}
+            </div>
+
+            <div className="absolute inset-0 z-10 flex items-end">
+              {months.map((monthKey, index) => (
+                <div
+                  key={monthKey}
+                  className="flex flex-1 items-end justify-center gap-1 px-1"
+                  aria-label={`${monthKey} 데이터`}
+                >
+                  {showPrevious && (
+                    <div
+                      className={`rounded-md ${themeStyles.previousBar} transition-all duration-300`}
+                      style={{
+                        height: `${barHeightPct(previousValues[index] || 0)}%`,
+                        width: '9px',
+                      }}
+                    ></div>
+                  )}
+                  <div
+                    className={`rounded-md ${themeStyles.currentBar} transition-all duration-300`}
+                    style={{
+                      height: `${barHeightPct(currentValues[index] || 0)}%`,
+                      width: showPrevious ? '11px' : '15px',
+                    }}
+                  ></div>
+                </div>
+              ))}
+            </div>
+
+            {showCumulative && linePath && (
+              <svg
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+                className="absolute inset-0 z-20 h-full w-full pointer-events-none"
+              >
+                <path
+                  d={linePath}
+                  className={`${themeStyles.lineStroke} opacity-30`}
+                  strokeWidth="5"
+                  fill="none"
+                  vectorEffect="non-scaling-stroke"
+                />
+                <path
+                  d={linePath}
+                  className={themeStyles.lineStroke}
+                  strokeWidth="2.4"
+                  fill="none"
+                  vectorEffect="non-scaling-stroke"
+                  style={{ filter: 'drop-shadow(0 2px 4px rgba(15, 23, 42, 0.18))' }}
+                />
+                {linePoints.map((point) => (
+                  <circle
+                    key={`${point.x}-${point.y}`}
+                    cx={point.x}
+                    cy={point.y}
+                    r="2"
+                    className={`${themeStyles.lineStroke} fill-white`}
+                    strokeWidth="2"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                ))}
+              </svg>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {showXAxisLabels && (
+        <div className="mt-2 flex text-[10px] text-gray-400">
+          {months.map((monthKey) => (
+            <div key={`${monthKey}-label`} className="flex-1 text-center">
+              {formatMonthLabel(monthKey)}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DonutChart({ segments, centerTopLabel, centerValueLabel }) {
+  const total = segments.reduce((acc, item) => acc + item.value, 0) || 1;
+  const radius = 16;
+  const circumference = 2 * Math.PI * radius;
+
+  const arcs = [];
+  let offset = 0;
+  segments.forEach((segment) => {
+    const fraction = segment.value / total;
+    const dash = fraction * circumference;
+    arcs.push({
+      ...segment,
+      dashArray: `${dash} ${circumference - dash}`,
+      dashOffset: -offset,
+    });
+    offset += dash;
+  });
+
+  return (
+    <div className="relative h-28 w-28">
+      <svg viewBox="0 0 42 42" className="h-full w-full -rotate-90">
+        <circle
+          cx="21"
+          cy="21"
+          r={radius}
+          fill="transparent"
+          strokeWidth="6"
+          className="stroke-gray-200"
+        />
+        {arcs.map((arc) => (
+          <circle
+            key={arc.id}
+            cx="21"
+            cy="21"
+            r={radius}
+            fill="transparent"
+            strokeWidth="6"
+            strokeDasharray={arc.dashArray}
+            strokeDashoffset={arc.dashOffset}
+            className={arc.strokeClass}
+            strokeLinecap="butt"
+          />
+        ))}
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+        <p className="text-[10px] text-gray-400">{centerTopLabel}</p>
+        <p className="text-sm font-bold text-gray-900">{centerValueLabel}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardApp({ onMenuChange, onDateSelect }) {
   const [isCameraFlowOpen, setIsCameraFlowOpen] = useState(false);
   const [isNotiOpen, setIsNotiOpen] = useState(false);
@@ -182,6 +525,10 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
   const [searchScope, setSearchScope] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isWeeklyExpanded, setIsWeeklyExpanded] = useState(false);
+  const [isAmountYoYEnabled, setIsAmountYoYEnabled] = useState(true);
+  const [isAmountCumulativeEnabled, setIsAmountCumulativeEnabled] = useState(false);
+  const [isVolumeYoYEnabled, setIsVolumeYoYEnabled] = useState(true);
+  const [isVolumeCumulativeEnabled, setIsVolumeCumulativeEnabled] = useState(false);
 
   const openCameraFlow = () => {
     setIsCameraFlowOpen(true);
@@ -268,6 +615,57 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
   const weeklyVisibleItems = isWeeklyExpanded
     ? WEEKLY_UPLOAD_SUMMARY
     : WEEKLY_UPLOAD_SUMMARY.slice(0, 2);
+
+  const currentMonthRangeLabel = formatMonthRangeLabel(REPORT_MONTH_KEYS);
+  const previousMonthRangeLabel = formatMonthRangeLabel(YOY_MONTH_KEYS);
+
+  const amountCurrent = MONTHLY_PURCHASE_METRICS.amount.current;
+  const amountPrevious = MONTHLY_PURCHASE_METRICS.amount.previous;
+  const amountTotal = sumValues(amountCurrent);
+  const amountPreviousTotal = sumValues(amountPrevious);
+  const amountYoYDelta = amountPreviousTotal
+    ? (amountTotal - amountPreviousTotal) / amountPreviousTotal
+    : 0;
+
+  const itemCountCurrent = MONTHLY_PURCHASE_METRICS.itemCount.current;
+  const itemCountPrevious = MONTHLY_PURCHASE_METRICS.itemCount.previous;
+  const itemCountTotal = sumValues(itemCountCurrent);
+  const itemCountPreviousTotal = sumValues(itemCountPrevious);
+  const itemCountYoYDelta = itemCountPreviousTotal
+    ? (itemCountTotal - itemCountPreviousTotal) / itemCountPreviousTotal
+    : 0;
+  const itemCountMonthlyAvg = Math.round(itemCountTotal / itemCountCurrent.length);
+  const itemCountPreviousMonthlyAvg = Math.round(itemCountPreviousTotal / itemCountPrevious.length);
+
+  const quantityCurrent = MONTHLY_PURCHASE_METRICS.quantity.current;
+  const quantityPrevious = MONTHLY_PURCHASE_METRICS.quantity.previous;
+  const quantityTotal = sumValues(quantityCurrent);
+  const quantityPreviousTotal = sumValues(quantityPrevious);
+  const quantityYoYDelta = quantityPreviousTotal
+    ? (quantityTotal - quantityPreviousTotal) / quantityPreviousTotal
+    : 0;
+  const quantityMonthlyAvg = Math.round(quantityTotal / quantityCurrent.length);
+  const quantityPreviousMonthlyAvg = Math.round(quantityPreviousTotal / quantityPrevious.length);
+
+  const supplierShareTotal = sumValues(
+    SUPPLIER_SHARE_AMOUNT_6M.map((item) => item.amount)
+  );
+  const supplierShareSegments = SUPPLIER_SHARE_AMOUNT_6M.map((item, index) => ({
+    ...item,
+    value: item.amount,
+    strokeClass: DONUT_COLORS[index]?.strokeClass || DONUT_COLORS[DONUT_COLORS.length - 1].strokeClass,
+    dotClass: DONUT_COLORS[index]?.dotClass || DONUT_COLORS[DONUT_COLORS.length - 1].dotClass,
+  }));
+
+  const productShareTotal = sumValues(
+    PRODUCT_SHARE_AMOUNT_TOP5_6M.map((item) => item.amount)
+  );
+  const productShareSegments = PRODUCT_SHARE_AMOUNT_TOP5_6M.map((item, index) => ({
+    ...item,
+    value: item.amount,
+    strokeClass: DONUT_COLORS[index]?.strokeClass || DONUT_COLORS[DONUT_COLORS.length - 1].strokeClass,
+    dotClass: DONUT_COLORS[index]?.dotClass || DONUT_COLORS[DONUT_COLORS.length - 1].dotClass,
+  }));
 
   const handleDateSelect = (item) => {
     const dateLabel = formatDateLabel(item.date);
@@ -405,22 +803,249 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
           )}
         </div>
 
-        {/* 통계 카드 영역 (Placeholder) */}
-        <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-4">
-          <div className="flex items-start justify-between gap-3">
+        {/* 6개월 매입현황: 매입액 */}
+        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 flex items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-bold text-gray-900">통계</p>
-              <p className="text-[10px] text-gray-400">통계 카드 준비 중</p>
+              <p className="text-sm font-bold text-gray-900">6개월 매입현황 · 매입액</p>
+              <p className="text-[10px] text-gray-400">
+                {currentMonthRangeLabel} (전년동기 {previousMonthRangeLabel})
+              </p>
             </div>
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-              <BarChart3 className="h-4 w-4" />
+            <div className="flex flex-wrap justify-end gap-2">
+              <StatToggle
+                active={isAmountYoYEnabled}
+                label="전년동기"
+                onClick={() => setIsAmountYoYEnabled((prev) => !prev)}
+              />
+              <StatToggle
+                active={isAmountCumulativeEnabled}
+                label="누적선"
+                onClick={() => setIsAmountCumulativeEnabled((prev) => !prev)}
+              />
             </div>
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <div className="h-16 rounded-xl bg-gray-100"></div>
-            <div className="h-16 rounded-xl bg-gray-100"></div>
-            <div className="h-16 rounded-xl bg-gray-100"></div>
-            <div className="h-16 rounded-xl bg-gray-100"></div>
+          <div className="px-4 py-3">
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-2">
+                <p className="text-[10px] font-semibold text-gray-500">6개월 누적</p>
+                <p className="text-sm font-bold text-gray-900">{formatKrwCompact(amountTotal)}</p>
+                <p className="text-[10px] text-gray-400">
+                  월 평균 {formatKrwCompact(Math.round(amountTotal / amountCurrent.length))}
+                </p>
+              </div>
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-2">
+                <p className="text-[10px] font-semibold text-gray-500">전년 동기 대비</p>
+                <p
+                  className={`text-sm font-bold ${
+                    amountYoYDelta >= 0 ? 'text-emerald-600' : 'text-red-600'
+                  }`}
+                >
+                  {formatYoYChange(amountTotal, amountPreviousTotal)}
+                </p>
+                <p className="text-[10px] text-gray-400">
+                  {formatKrwCompact(amountPreviousTotal)} → {formatKrwCompact(amountTotal)}
+                </p>
+              </div>
+            </div>
+
+            <BarCumulativeChart
+              months={REPORT_MONTH_KEYS}
+              currentValues={amountCurrent}
+              previousValues={amountPrevious}
+              showPrevious={isAmountYoYEnabled}
+              showCumulative={isAmountCumulativeEnabled}
+              theme="blue"
+              showYAxisLabels
+              yAxisLabelFormatter={formatKrwCompact}
+            />
+
+            <div className="mt-3 flex items-center justify-between text-[10px] text-gray-400">
+              <div className="flex items-center gap-3">
+                <span className="inline-flex items-center gap-1">
+                  <span className="h-2 w-2 rounded bg-blue-600"></span>
+                  <span>해당기간</span>
+                </span>
+                {isAmountYoYEnabled && (
+                  <span className="inline-flex items-center gap-1">
+                    <span className="h-2 w-2 rounded bg-blue-200 border border-blue-200"></span>
+                    <span>전년동기</span>
+                  </span>
+                )}
+                {isAmountCumulativeEnabled && (
+                  <span className="inline-flex items-center gap-1">
+                    <span className="h-px w-6 bg-blue-700"></span>
+                    <span>누적</span>
+                  </span>
+                )}
+              </div>
+              <span>단위: 원</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 6개월 매입현황: 품목 건수 & 수량 */}
+        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-bold text-gray-900">6개월 매입현황 · 품목/수량</p>
+              <p className="text-[10px] text-gray-400">
+                {currentMonthRangeLabel} (전년동기 {previousMonthRangeLabel})
+              </p>
+            </div>
+            <div className="flex flex-wrap justify-end gap-2">
+              <StatToggle
+                active={isVolumeYoYEnabled}
+                label="전년동기"
+                onClick={() => setIsVolumeYoYEnabled((prev) => !prev)}
+              />
+              <StatToggle
+                active={isVolumeCumulativeEnabled}
+                label="누적선"
+                onClick={() => setIsVolumeCumulativeEnabled((prev) => !prev)}
+              />
+            </div>
+          </div>
+          <div className="px-4 py-3 space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-2">
+                <p className="text-[10px] font-semibold text-gray-500">월평균 품목 건수</p>
+                <p className="text-sm font-bold text-gray-900">{formatNumber(itemCountMonthlyAvg)}개</p>
+                <p className="text-[10px] text-gray-400">
+                  전년 {formatNumber(itemCountPreviousMonthlyAvg)}개
+                </p>
+              </div>
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-2">
+                <p className="text-[10px] font-semibold text-gray-500">6개월 누적 수량</p>
+                <p className="text-sm font-bold text-gray-900">{formatNumber(quantityTotal)}개</p>
+                <p
+                  className={`text-[10px] font-semibold ${
+                    quantityYoYDelta >= 0 ? 'text-emerald-600' : 'text-red-600'
+                  }`}
+                >
+                  전년동기 {formatYoYChange(quantityTotal, quantityPreviousTotal)}
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] font-semibold text-gray-700">월별 품목 건수</p>
+                <span
+                  className={`text-[10px] font-semibold ${
+                    itemCountYoYDelta >= 0 ? 'text-emerald-600' : 'text-red-600'
+                  }`}
+                >
+                  6개월 합계 {formatYoYChange(itemCountTotal, itemCountPreviousTotal)}
+                </span>
+              </div>
+              <BarCumulativeChart
+                months={REPORT_MONTH_KEYS}
+                currentValues={itemCountCurrent}
+                previousValues={itemCountPrevious}
+                showPrevious={isVolumeYoYEnabled}
+                showCumulative={isVolumeCumulativeEnabled}
+                theme="indigo"
+                heightClass="h-20"
+                showXAxisLabels={false}
+              />
+            </div>
+
+            <div className="pt-3 border-t border-gray-100">
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] font-semibold text-gray-700">월별 수량</p>
+                <span className="text-[10px] text-gray-400">
+                  월평균 {formatNumber(quantityMonthlyAvg)}개 (전년 {formatNumber(quantityPreviousMonthlyAvg)}개)
+                </span>
+              </div>
+              <BarCumulativeChart
+                months={REPORT_MONTH_KEYS}
+                currentValues={quantityCurrent}
+                previousValues={quantityPrevious}
+                showPrevious={isVolumeYoYEnabled}
+                showCumulative={isVolumeCumulativeEnabled}
+                theme="emerald"
+                heightClass="h-20"
+              />
+
+              <div className="mt-3 flex items-center justify-between text-[10px] text-gray-400">
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex items-center gap-1">
+                    <span className="h-2 w-2 rounded bg-indigo-600"></span>
+                    <span>품목 건수</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <span className="h-2 w-2 rounded bg-emerald-600"></span>
+                    <span>수량</span>
+                  </span>
+                </div>
+                <span>단위: 개</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 공급사 기준 비중 원그래프 */}
+        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100">
+            <p className="text-sm font-bold text-gray-900">공급사 비중</p>
+            <p className="text-[10px] text-gray-400">기준: {currentMonthRangeLabel} 매입액</p>
+          </div>
+          <div className="px-4 py-3 flex items-start gap-4">
+            <DonutChart
+              segments={supplierShareSegments}
+              centerTopLabel="6개월"
+              centerValueLabel={formatKrwCompact(supplierShareTotal)}
+            />
+            <div className="flex-1 space-y-2">
+              {supplierShareSegments.map((segment) => {
+                const percent = (segment.value / supplierShareTotal) * 100;
+                return (
+                  <div key={segment.id} className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={`mt-1 h-2 w-2 rounded-full ${segment.dotClass}`}></span>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-gray-700 truncate">{segment.label}</p>
+                        <p className="text-[10px] text-gray-400">{formatKrwCompact(segment.value)}</p>
+                      </div>
+                    </div>
+                    <p className="text-xs font-bold text-gray-900">{percent.toFixed(1)}%</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* 품목 기준 비중 Top5 원그래프 */}
+        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100">
+            <p className="text-sm font-bold text-gray-900">품목 비중 Top5</p>
+            <p className="text-[10px] text-gray-400">기준: {currentMonthRangeLabel} 매입액</p>
+          </div>
+          <div className="px-4 py-3 flex items-start gap-4">
+            <DonutChart
+              segments={productShareSegments}
+              centerTopLabel="6개월"
+              centerValueLabel={formatKrwCompact(productShareTotal)}
+            />
+            <div className="flex-1 space-y-2">
+              {productShareSegments.map((segment) => {
+                const percent = (segment.value / productShareTotal) * 100;
+                return (
+                  <div key={segment.id} className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={`mt-1 h-2 w-2 rounded-full ${segment.dotClass}`}></span>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-gray-700 truncate">{segment.label}</p>
+                        <p className="text-[10px] text-gray-400">{formatKrwCompact(segment.value)}</p>
+                      </div>
+                    </div>
+                    <p className="text-xs font-bold text-gray-900">{percent.toFixed(1)}%</p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 
