@@ -1065,15 +1065,9 @@ function ExpiryGroupSection({
   onToggleCheck,
 }) {
   const showNewBadge = isExpanded && (group.id === 'risk' || group.id === 'caution');
-  const sortedItems = [...items]
-    .map((item, index) => ({ item, index }))
-    .sort((a, b) => {
-      const aNew = a.item.isNewEntry ? 1 : 0;
-      const bNew = b.item.isNewEntry ? 1 : 0;
-      if (aNew !== bNew) return bNew - aNew;
-      return a.index - b.index;
-    })
-    .map((entry) => entry.item);
+  const newItems = items.filter((item) => item.isNewEntry);
+  const regularItems = items.filter((item) => !item.isNewEntry);
+  const sortedItems = [...newItems, ...regularItems];
   return (
     <div id={`expiry-group-${group.id}`} className={`border-l-4 ${tone.accent} pl-3`}>
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
@@ -1124,15 +1118,23 @@ function ExpiryGroupSection({
               </div>
             ) : (
               <div className="space-y-2">
-                {sortedItems.map((item) => (
-                  <ExpiryItemCard
-                    key={item.id}
-                    item={item}
-                    tone={tone}
-                    onViewInvoice={onViewInvoice}
-                    onToggleCheck={onToggleCheck}
-                    showNewBadge={showNewBadge}
-                  />
+                {sortedItems.map((item, index) => (
+                  <React.Fragment key={item.id}>
+                    {index === newItems.length && newItems.length > 0 && (
+                      <div className="flex items-center gap-2 pt-1">
+                        <span className="h-px flex-1 bg-gray-200"></span>
+                        <span className="text-[10px] text-gray-400">기존 품목</span>
+                        <span className="h-px flex-1 bg-gray-200"></span>
+                      </div>
+                    )}
+                    <ExpiryItemCard
+                      item={item}
+                      tone={tone}
+                      onViewInvoice={onViewInvoice}
+                      onToggleCheck={onToggleCheck}
+                      showNewBadge={showNewBadge}
+                    />
+                  </React.Fragment>
                 ))}
               </div>
             )}
