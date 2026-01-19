@@ -62,36 +62,36 @@ const YOY_MONTH_KEYS = [
   '2025-01',
 ];
 
-const MONTHLY_PURCHASE_METRICS = {
+const MOCK_MONTHLY_PURCHASE_METRICS = {
   amount: {
-    current: [18500000, 20400000, 19850000, 22100000, 23800000, 24750000],
-    previous: [16900000, 17500000, 18200000, 19500000, 20100000, 21000000],
+    current: [17200000, 19800000, 18100000, 23300000, 21400000, 26100000],
+    previous: [15800000, 17300000, 16900000, 20100000, 18900000, 21200000],
   },
   itemCount: {
-    current: [210, 225, 234, 240, 250, 262],
-    previous: [198, 205, 212, 222, 230, 235],
+    current: [205, 236, 220, 248, 231, 270],
+    previous: [192, 210, 204, 223, 215, 235],
   },
   quantity: {
-    current: [3200, 3450, 3380, 3550, 3680, 3920],
-    previous: [3050, 3100, 3150, 3220, 3300, 3450],
+    current: [3100, 3520, 3340, 3710, 3450, 4050],
+    previous: [2950, 3180, 3090, 3330, 3210, 3580],
   },
 };
 
-const SUPPLIER_SHARE_AMOUNT_6M = [
-  { id: 'vitaminhouse', label: '비타민하우스', amount: 42000000 },
-  { id: 'gc', label: '(주)녹십자', amount: 31000000 },
-  { id: 'yuhan', label: '(주)유한양행', amount: 24000000 },
-  { id: 'chong', label: '종근당', amount: 18000000 },
-  { id: 'others', label: '기타', amount: 14400000 },
+const MOCK_SUPPLIER_SHARE_AMOUNT_6M = [
+  { id: 'vitaminhouse', label: '비타민하우스', amount: 38200000 },
+  { id: 'gc', label: '(주)녹십자', amount: 29800000 },
+  { id: 'yuhan', label: '(주)유한양행', amount: 22600000 },
+  { id: 'chong', label: '종근당', amount: 17100000 },
+  { id: 'others', label: '기타', amount: 16300000 },
 ];
 
-const PRODUCT_SHARE_AMOUNT_TOP5_6M = [
-  { id: 'taxen', label: '탁센 연질캡슐', amount: 19000000 },
-  { id: 'bmax', label: '비맥스 메타정', amount: 16000000 },
-  { id: 'scfa', label: '단쇄지방산 SCFA455', amount: 14000000 },
-  { id: 'omega', label: '프리미엄 오메가3', amount: 12500000 },
-  { id: 'nmn', label: '미라클 프로젝트 NMN250', amount: 11000000 },
-  { id: 'others', label: '기타', amount: 56900000 },
+const MOCK_PRODUCT_SHARE_AMOUNT_TOP5_6M = [
+  { id: 'taxen', label: '탁센 연질캡슐', amount: 18400000 },
+  { id: 'bmax', label: '비맥스 메타정', amount: 16200000 },
+  { id: 'scfa', label: '단쇄지방산 SCFA455', amount: 14100000 },
+  { id: 'omega', label: '프리미엄 오메가3', amount: 12700000 },
+  { id: 'nmn', label: '미라클 프로젝트 NMN250', amount: 11300000 },
+  { id: 'others', label: '기타', amount: 57100000 },
 ];
 
 const SEARCH_ITEMS = [
@@ -185,32 +185,32 @@ const STATUS_TONE = {
 };
 
 const DONUT_COLORS = [
-  { strokeClass: 'stroke-blue-500', dotClass: 'bg-blue-500' },
-  { strokeClass: 'stroke-emerald-500', dotClass: 'bg-emerald-500' },
-  { strokeClass: 'stroke-amber-500', dotClass: 'bg-amber-500' },
-  { strokeClass: 'stroke-violet-500', dotClass: 'bg-violet-500' },
-  { strokeClass: 'stroke-slate-500', dotClass: 'bg-slate-500' },
-  { strokeClass: 'stroke-gray-400', dotClass: 'bg-gray-400' },
+  { stroke: '#3b82f6', dot: '#3b82f6' },
+  { stroke: '#10b981', dot: '#10b981' },
+  { stroke: '#f59e0b', dot: '#f59e0b' },
+  { stroke: '#8b5cf6', dot: '#8b5cf6' },
+  { stroke: '#64748b', dot: '#64748b' },
+  { stroke: '#9ca3af', dot: '#9ca3af' },
 ];
 
-const CHART_THEMES = {
+const CHART_THEME_STYLES = {
   blue: {
-    currentBar:
-      'bg-gradient-to-t from-blue-600 via-blue-500 to-blue-400 shadow-sm shadow-blue-200',
-    previousBar: 'bg-gradient-to-t from-blue-200 to-blue-100',
-    lineStroke: 'stroke-blue-700',
+    currentGradient: 'linear-gradient(180deg, #60a5fa 0%, #3b82f6 55%, #2563eb 100%)',
+    previousGradient: 'linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%)',
+    lineColor: '#1d4ed8',
+    barShadow: '0 6px 10px rgba(37, 99, 235, 0.2)',
   },
   indigo: {
-    currentBar:
-      'bg-gradient-to-t from-indigo-600 via-indigo-500 to-indigo-400 shadow-sm shadow-indigo-200',
-    previousBar: 'bg-gradient-to-t from-indigo-200 to-indigo-100',
-    lineStroke: 'stroke-indigo-700',
+    currentGradient: 'linear-gradient(180deg, #818cf8 0%, #6366f1 55%, #4f46e5 100%)',
+    previousGradient: 'linear-gradient(180deg, #e0e7ff 0%, #c7d2fe 100%)',
+    lineColor: '#4338ca',
+    barShadow: '0 6px 10px rgba(79, 70, 229, 0.22)',
   },
   emerald: {
-    currentBar:
-      'bg-gradient-to-t from-emerald-600 via-emerald-500 to-emerald-400 shadow-sm shadow-emerald-200',
-    previousBar: 'bg-gradient-to-t from-emerald-200 to-emerald-100',
-    lineStroke: 'stroke-emerald-700',
+    currentGradient: 'linear-gradient(180deg, #34d399 0%, #10b981 55%, #059669 100%)',
+    previousGradient: 'linear-gradient(180deg, #d1fae5 0%, #a7f3d0 100%)',
+    lineColor: '#047857',
+    barShadow: '0 6px 10px rgba(5, 150, 105, 0.2)',
   },
 };
 
@@ -325,13 +325,13 @@ function BarCumulativeChart({
   showYAxisLabels = false,
   yAxisLabelFormatter,
 }) {
-  const themeStyles = CHART_THEMES[theme] || CHART_THEMES.blue;
-  const cumulative = showCumulative ? cumulativeValues(currentValues) : [];
-  const valuesForMax = [
-    ...currentValues,
-    ...(showPrevious ? previousValues : []),
-    ...(showCumulative ? cumulative : []),
-  ];
+  const themeStyles = CHART_THEME_STYLES[theme] || CHART_THEME_STYLES.blue;
+  const isCumulativeView = showCumulative;
+  const currentCumulative = cumulativeValues(currentValues);
+  const previousCumulative = showPrevious ? cumulativeValues(previousValues) : [];
+  const valuesForMax = isCumulativeView
+    ? [...currentCumulative, ...(showPrevious ? previousCumulative : [])]
+    : [...currentValues, ...(showPrevious ? previousValues : [])];
   const maxValue = Math.max(...valuesForMax, 1);
   const labelFormatter = yAxisLabelFormatter || formatNumber;
   const yAxisLabels = showYAxisLabels
@@ -349,16 +349,19 @@ function BarCumulativeChart({
     return Math.max(pct, 2);
   };
 
-  const linePoints = showCumulative
-    ? cumulative.map((value, index) => {
-        const x = ((index + 0.5) / months.length) * 100;
-        const y = 100 - (value / maxValue) * 100;
-        return { x, y };
-      })
-    : [];
-  const linePath = linePoints
-    .map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`)
-    .join(' ');
+  const buildLinePoints = (values) =>
+    values.map((value, index) => {
+      const x = ((index + 0.5) / months.length) * 100;
+      const y = 100 - (value / maxValue) * 100;
+      return { x, y };
+    });
+  const buildLinePath = (points) =>
+    points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`).join(' ');
+  const currentLinePoints = isCumulativeView ? buildLinePoints(currentCumulative) : [];
+  const currentLinePath = buildLinePath(currentLinePoints);
+  const previousLinePoints =
+    isCumulativeView && showPrevious ? buildLinePoints(previousCumulative) : [];
+  const previousLinePath = buildLinePath(previousLinePoints);
 
   return (
     <div>
@@ -385,66 +388,88 @@ function BarCumulativeChart({
               ))}
             </div>
 
-            <div className="absolute inset-0 z-10 flex items-end">
-              {months.map((monthKey, index) => (
-                <div
-                  key={monthKey}
-                  className="flex flex-1 items-end justify-center gap-1 px-1"
-                  aria-label={`${monthKey} 데이터`}
-                >
-                  {showPrevious && (
+            {!isCumulativeView && (
+              <div className="absolute inset-0 z-10 flex items-end">
+                {months.map((monthKey, index) => (
+                  <div
+                    key={monthKey}
+                    className="flex flex-1 h-full items-end justify-center gap-1 px-1"
+                    aria-label={`${monthKey} 데이터`}
+                  >
+                    {showPrevious && (
+                      <div
+                        className="rounded-md transition-all duration-300"
+                        style={{
+                          height: `${barHeightPct(previousValues[index] || 0)}%`,
+                          width: '9px',
+                          backgroundImage: themeStyles.previousGradient,
+                        }}
+                      ></div>
+                    )}
                     <div
-                      className={`rounded-md ${themeStyles.previousBar} transition-all duration-300`}
+                      className="rounded-md transition-all duration-300"
                       style={{
-                        height: `${barHeightPct(previousValues[index] || 0)}%`,
-                        width: '9px',
+                        height: `${barHeightPct(currentValues[index] || 0)}%`,
+                        width: showPrevious ? '11px' : '15px',
+                        backgroundImage: themeStyles.currentGradient,
+                        boxShadow: themeStyles.barShadow,
                       }}
                     ></div>
-                  )}
-                  <div
-                    className={`rounded-md ${themeStyles.currentBar} transition-all duration-300`}
-                    style={{
-                      height: `${barHeightPct(currentValues[index] || 0)}%`,
-                      width: showPrevious ? '11px' : '15px',
-                    }}
-                  ></div>
-                </div>
-              ))}
-            </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
-            {showCumulative && linePath && (
+            {isCumulativeView && currentLinePath && (
               <svg
                 viewBox="0 0 100 100"
                 preserveAspectRatio="none"
                 className="absolute inset-0 z-20 h-full w-full pointer-events-none"
               >
+                {showPrevious && previousLinePath && (
+                  <path
+                    d={previousLinePath}
+                    className="opacity-35"
+                    strokeWidth="2"
+                    fill="none"
+                    stroke={themeStyles.lineColor}
+                    strokeDasharray="4 4"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                )}
                 <path
-                  d={linePath}
-                  className={`${themeStyles.lineStroke} opacity-30`}
+                  d={currentLinePath}
+                  className="opacity-30"
                   strokeWidth="5"
                   fill="none"
+                  stroke={themeStyles.lineColor}
                   vectorEffect="non-scaling-stroke"
                 />
                 <path
-                  d={linePath}
-                  className={themeStyles.lineStroke}
+                  d={currentLinePath}
                   strokeWidth="2.4"
                   fill="none"
+                  stroke={themeStyles.lineColor}
                   vectorEffect="non-scaling-stroke"
                   style={{ filter: 'drop-shadow(0 2px 4px rgba(15, 23, 42, 0.18))' }}
                 />
-                {linePoints.map((point) => (
-                  <circle
-                    key={`${point.x}-${point.y}`}
-                    cx={point.x}
-                    cy={point.y}
-                    r="2"
-                    className={`${themeStyles.lineStroke} fill-white`}
-                    strokeWidth="2"
-                    vectorEffect="non-scaling-stroke"
-                  />
-                ))}
               </svg>
+            )}
+            {isCumulativeView && currentLinePoints.length > 0 && (
+              <div className="absolute inset-0 z-30 pointer-events-none">
+                {currentLinePoints.map((point) => (
+                  <span
+                    key={`${point.x}-${point.y}`}
+                    className="absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white border-2"
+                    style={{
+                      left: `${point.x}%`,
+                      top: `${point.y}%`,
+                      borderColor: themeStyles.lineColor,
+                      boxShadow: '0 2px 6px rgba(15, 23, 42, 0.18)',
+                    }}
+                  ></span>
+                ))}
+              </div>
             )}
           </div>
         </div>
@@ -502,7 +527,7 @@ function DonutChart({ segments, centerTopLabel, centerValueLabel }) {
             strokeWidth="6"
             strokeDasharray={arc.dashArray}
             strokeDashoffset={arc.dashOffset}
-            className={arc.strokeClass}
+            stroke={arc.strokeColor}
             strokeLinecap="butt"
           />
         ))}
@@ -619,16 +644,16 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
   const currentMonthRangeLabel = formatMonthRangeLabel(REPORT_MONTH_KEYS);
   const previousMonthRangeLabel = formatMonthRangeLabel(YOY_MONTH_KEYS);
 
-  const amountCurrent = MONTHLY_PURCHASE_METRICS.amount.current;
-  const amountPrevious = MONTHLY_PURCHASE_METRICS.amount.previous;
+  const amountCurrent = MOCK_MONTHLY_PURCHASE_METRICS.amount.current;
+  const amountPrevious = MOCK_MONTHLY_PURCHASE_METRICS.amount.previous;
   const amountTotal = sumValues(amountCurrent);
   const amountPreviousTotal = sumValues(amountPrevious);
   const amountYoYDelta = amountPreviousTotal
     ? (amountTotal - amountPreviousTotal) / amountPreviousTotal
     : 0;
 
-  const itemCountCurrent = MONTHLY_PURCHASE_METRICS.itemCount.current;
-  const itemCountPrevious = MONTHLY_PURCHASE_METRICS.itemCount.previous;
+  const itemCountCurrent = MOCK_MONTHLY_PURCHASE_METRICS.itemCount.current;
+  const itemCountPrevious = MOCK_MONTHLY_PURCHASE_METRICS.itemCount.previous;
   const itemCountTotal = sumValues(itemCountCurrent);
   const itemCountPreviousTotal = sumValues(itemCountPrevious);
   const itemCountYoYDelta = itemCountPreviousTotal
@@ -637,8 +662,8 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
   const itemCountMonthlyAvg = Math.round(itemCountTotal / itemCountCurrent.length);
   const itemCountPreviousMonthlyAvg = Math.round(itemCountPreviousTotal / itemCountPrevious.length);
 
-  const quantityCurrent = MONTHLY_PURCHASE_METRICS.quantity.current;
-  const quantityPrevious = MONTHLY_PURCHASE_METRICS.quantity.previous;
+  const quantityCurrent = MOCK_MONTHLY_PURCHASE_METRICS.quantity.current;
+  const quantityPrevious = MOCK_MONTHLY_PURCHASE_METRICS.quantity.previous;
   const quantityTotal = sumValues(quantityCurrent);
   const quantityPreviousTotal = sumValues(quantityPrevious);
   const quantityYoYDelta = quantityPreviousTotal
@@ -648,24 +673,30 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
   const quantityPreviousMonthlyAvg = Math.round(quantityPreviousTotal / quantityPrevious.length);
 
   const supplierShareTotal = sumValues(
-    SUPPLIER_SHARE_AMOUNT_6M.map((item) => item.amount)
+    MOCK_SUPPLIER_SHARE_AMOUNT_6M.map((item) => item.amount)
   );
-  const supplierShareSegments = SUPPLIER_SHARE_AMOUNT_6M.map((item, index) => ({
-    ...item,
-    value: item.amount,
-    strokeClass: DONUT_COLORS[index]?.strokeClass || DONUT_COLORS[DONUT_COLORS.length - 1].strokeClass,
-    dotClass: DONUT_COLORS[index]?.dotClass || DONUT_COLORS[DONUT_COLORS.length - 1].dotClass,
-  }));
+  const supplierShareSegments = MOCK_SUPPLIER_SHARE_AMOUNT_6M.map((item, index) => {
+    const color = DONUT_COLORS[index] || DONUT_COLORS[DONUT_COLORS.length - 1];
+    return {
+      ...item,
+      value: item.amount,
+      strokeColor: color.stroke,
+      dotColor: color.dot,
+    };
+  });
 
   const productShareTotal = sumValues(
-    PRODUCT_SHARE_AMOUNT_TOP5_6M.map((item) => item.amount)
+    MOCK_PRODUCT_SHARE_AMOUNT_TOP5_6M.map((item) => item.amount)
   );
-  const productShareSegments = PRODUCT_SHARE_AMOUNT_TOP5_6M.map((item, index) => ({
-    ...item,
-    value: item.amount,
-    strokeClass: DONUT_COLORS[index]?.strokeClass || DONUT_COLORS[DONUT_COLORS.length - 1].strokeClass,
-    dotClass: DONUT_COLORS[index]?.dotClass || DONUT_COLORS[DONUT_COLORS.length - 1].dotClass,
-  }));
+  const productShareSegments = MOCK_PRODUCT_SHARE_AMOUNT_TOP5_6M.map((item, index) => {
+    const color = DONUT_COLORS[index] || DONUT_COLORS[DONUT_COLORS.length - 1];
+    return {
+      ...item,
+      value: item.amount,
+      strokeColor: color.stroke,
+      dotColor: color.dot,
+    };
+  });
 
   const handleDateSelect = (item) => {
     const dateLabel = formatDateLabel(item.date);
@@ -820,7 +851,7 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
               />
               <StatToggle
                 active={isAmountCumulativeEnabled}
-                label="누적선"
+                label="누적"
                 onClick={() => setIsAmountCumulativeEnabled((prev) => !prev)}
               />
             </div>
@@ -862,21 +893,33 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
 
             <div className="mt-3 flex items-center justify-between text-[10px] text-gray-400">
               <div className="flex items-center gap-3">
-                <span className="inline-flex items-center gap-1">
-                  <span className="h-2 w-2 rounded bg-blue-600"></span>
-                  <span>해당기간</span>
-                </span>
-                {isAmountYoYEnabled && (
-                  <span className="inline-flex items-center gap-1">
-                    <span className="h-2 w-2 rounded bg-blue-200 border border-blue-200"></span>
-                    <span>전년동기</span>
-                  </span>
+                {!isAmountCumulativeEnabled && (
+                  <>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="h-2 w-2 rounded bg-blue-600"></span>
+                      <span>해당기간</span>
+                    </span>
+                    {isAmountYoYEnabled && (
+                      <span className="inline-flex items-center gap-1">
+                        <span className="h-2 w-2 rounded bg-blue-200 border border-blue-200"></span>
+                        <span>전년동기</span>
+                      </span>
+                    )}
+                  </>
                 )}
                 {isAmountCumulativeEnabled && (
-                  <span className="inline-flex items-center gap-1">
-                    <span className="h-px w-6 bg-blue-700"></span>
-                    <span>누적</span>
-                  </span>
+                  <>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="h-px w-6 bg-blue-700"></span>
+                      <span>누적</span>
+                    </span>
+                    {isAmountYoYEnabled && (
+                      <span className="inline-flex items-center gap-1">
+                        <span className="h-0 w-6 border-t border-dashed border-blue-300"></span>
+                        <span>전년동기</span>
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
               <span>단위: 원</span>
@@ -901,7 +944,7 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
               />
               <StatToggle
                 active={isVolumeCumulativeEnabled}
-                label="누적선"
+                label="누적"
                 onClick={() => setIsVolumeCumulativeEnabled((prev) => !prev)}
               />
             </div>
@@ -930,7 +973,9 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
 
             <div>
               <div className="flex items-center justify-between">
-                <p className="text-[11px] font-semibold text-gray-700">월별 품목 건수</p>
+                <p className="text-[11px] font-semibold text-gray-700">
+                  {isVolumeCumulativeEnabled ? '누적 품목 건수' : '월별 품목 건수'}
+                </p>
                 <span
                   className={`text-[10px] font-semibold ${
                     itemCountYoYDelta >= 0 ? 'text-emerald-600' : 'text-red-600'
@@ -953,7 +998,9 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
 
             <div className="pt-3 border-t border-gray-100">
               <div className="flex items-center justify-between">
-                <p className="text-[11px] font-semibold text-gray-700">월별 수량</p>
+                <p className="text-[11px] font-semibold text-gray-700">
+                  {isVolumeCumulativeEnabled ? '누적 수량' : '월별 수량'}
+                </p>
                 <span className="text-[10px] text-gray-400">
                   월평균 {formatNumber(quantityMonthlyAvg)}개 (전년 {formatNumber(quantityPreviousMonthlyAvg)}개)
                 </span>
@@ -970,14 +1017,30 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
 
               <div className="mt-3 flex items-center justify-between text-[10px] text-gray-400">
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex items-center gap-1">
-                    <span className="h-2 w-2 rounded bg-indigo-600"></span>
-                    <span>품목 건수</span>
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <span className="h-2 w-2 rounded bg-emerald-600"></span>
-                    <span>수량</span>
-                  </span>
+                  {!isVolumeCumulativeEnabled && (
+                    <>
+                      <span className="inline-flex items-center gap-1">
+                        <span className="h-2 w-2 rounded bg-indigo-600"></span>
+                        <span>품목 건수</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <span className="h-2 w-2 rounded bg-emerald-600"></span>
+                        <span>수량</span>
+                      </span>
+                    </>
+                  )}
+                  {isVolumeCumulativeEnabled && (
+                    <>
+                      <span className="inline-flex items-center gap-1">
+                        <span className="h-px w-6 bg-indigo-600"></span>
+                        <span>품목 건수</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <span className="h-px w-6 bg-emerald-600"></span>
+                        <span>수량</span>
+                      </span>
+                    </>
+                  )}
                 </div>
                 <span>단위: 개</span>
               </div>
@@ -1003,7 +1066,10 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
                 return (
                   <div key={segment.id} className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className={`mt-1 h-2 w-2 rounded-full ${segment.dotClass}`}></span>
+                      <span
+                        className="mt-1 h-2 w-2 rounded-full"
+                        style={{ backgroundColor: segment.dotColor }}
+                      ></span>
                       <div className="min-w-0">
                         <p className="text-xs font-semibold text-gray-700 truncate">{segment.label}</p>
                         <p className="text-[10px] text-gray-400">{formatKrwCompact(segment.value)}</p>
@@ -1035,7 +1101,10 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
                 return (
                   <div key={segment.id} className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className={`mt-1 h-2 w-2 rounded-full ${segment.dotClass}`}></span>
+                      <span
+                        className="mt-1 h-2 w-2 rounded-full"
+                        style={{ backgroundColor: segment.dotColor }}
+                      ></span>
                       <div className="min-w-0">
                         <p className="text-xs font-semibold text-gray-700 truncate">{segment.label}</p>
                         <p className="text-[10px] text-gray-400">{formatKrwCompact(segment.value)}</p>
