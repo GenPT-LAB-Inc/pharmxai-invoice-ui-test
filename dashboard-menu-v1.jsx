@@ -1103,9 +1103,6 @@ export default function DashboardApp({ onMenuChange, onDateSelect }) {
             </button>
           </div>
           <div className="px-4 py-2.5 space-y-2">
-            <p className="text-[9px] text-gray-400 leading-tight">
-              위험 &lt;6개월 · 주의 6~12개월 · 보통 12~24개월 · 안전 24개월 이상
-            </p>
             <div className="grid grid-cols-2 gap-1.5">
               {EXPIRY_GROUPS.map((group) => {
                 const tone = EXPIRY_GROUP_TONE[group.id];
