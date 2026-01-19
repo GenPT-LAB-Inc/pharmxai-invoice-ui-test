@@ -84,7 +84,7 @@ const EXPIRY_ITEMS = [
     productName: '제놀 쿨 파스',
     lot: 'E554433',
     qty: 80,
-    expiry: '2026-06-25',
+    expiry: '2026-06-28',
     invoiceId: INVOICE_B_ID,
   },
   {
@@ -114,7 +114,7 @@ const EXPIRY_ITEMS = [
     productName: '유한락스 헬스',
     lot: 'Y667788',
     qty: 26,
-    expiry: '2026-11-30',
+    expiry: '2027-01-02',
     invoiceId: INVOICE_C_ID,
   },
   {
@@ -124,7 +124,7 @@ const EXPIRY_ITEMS = [
     productName: '락토핏 골드',
     lot: 'C445566',
     qty: 40,
-    expiry: '2026-12-28',
+    expiry: '2027-01-04',
     invoiceId: INVOICE_B_ID,
   },
   {
@@ -309,6 +309,17 @@ const RECENT_SEARCHES = ['오메가3', '비타민하우스', 'C998877'];
 
 const parseDate = (value) => new Date(`${value}T00:00:00`);
 
+const addDays = (value, amount) => {
+  const date = parseDate(value);
+  date.setDate(date.getDate() + amount);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const PREVIOUS_BASE_DATE = addDays(BASE_DATE, -7);
+
 const formatDate = (value) => {
   const date = parseDate(value);
   const year = date.getFullYear();
@@ -375,11 +386,17 @@ export default function ExpiryCheckApp({ onMenuChange }) {
     () =>
       EXPIRY_ITEMS.map((item) => {
         const remainingDays = getRemainingDays(item.expiry);
+        const previousRemainingDays = getRemainingDays(item.expiry, PREVIOUS_BASE_DATE);
+        const groupId = getGroupId(remainingDays);
+        const previousGroupId = getGroupId(previousRemainingDays);
         return {
           ...item,
           remainingDays,
           remainingLabel: getRemainingLabel(remainingDays),
-          groupId: getGroupId(remainingDays),
+          groupId,
+          previousGroupId,
+          isNewEntry:
+            (groupId === 'risk' || groupId === 'caution') && previousGroupId !== groupId,
           invoiceImage: getInvoiceImageData(item.invoiceId),
         };
       }),
@@ -404,6 +421,19 @@ export default function ExpiryCheckApp({ onMenuChange }) {
       ),
     [itemsWithStatus, selectedSupplier]
   );
+
+  const newEntryCounts = useMemo(() => {
+    const newRiskEntries = itemsBySupplier.filter(
+      (item) => item.groupId === 'risk' && item.previousGroupId !== 'risk'
+    );
+    const newCautionEntries = itemsBySupplier.filter(
+      (item) => item.groupId === 'caution' && item.previousGroupId !== 'caution'
+    );
+    return {
+      risk: newRiskEntries.length,
+      caution: newCautionEntries.length,
+    };
+  }, [itemsBySupplier]);
 
   const statusCounts = useMemo(
     () =>
@@ -679,6 +709,7 @@ export default function ExpiryCheckApp({ onMenuChange }) {
                 const tone = GROUP_TONE[group.id];
                 const stats = groupStats[group.id];
                 const isActive = activeGroupId === group.id;
+                const newEntryCount = newEntryCounts[group.id] || 0;
                 return (
                   <button
                     key={group.id}
@@ -702,7 +733,16 @@ export default function ExpiryCheckApp({ onMenuChange }) {
                           </p>
                         </div>
                       </div>
-                      <p className="text-sm font-bold text-gray-900">{stats.count}건</p>
+                      <div className="flex flex-col items-end gap-1">
+                        <p className="text-sm font-bold text-gray-900">{stats.count}건</p>
+                        {newEntryCount > 0 && (
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[9px] font-semibold ${tone.badge}`}
+                          >
+                            신규 +{newEntryCount}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     {isSummaryExpanded && (
                       <div className="mt-2 text-right text-[10px] text-gray-400">
@@ -729,6 +769,7 @@ export default function ExpiryCheckApp({ onMenuChange }) {
                   tone={GROUP_TONE[group.id]}
                   items={items}
                   stats={stats}
+                  newEntryCount={newEntryCounts[group.id] || 0}
                   isExpanded={isExpanded}
                   onToggle={() => handleGroupToggle(group.id)}
                   onViewInvoice={openInvoiceViewer}
@@ -1017,11 +1058,22 @@ function ExpiryGroupSection({
   tone,
   items,
   stats,
+  newEntryCount,
   isExpanded,
   onToggle,
   onViewInvoice,
   onToggleCheck,
 }) {
+  const showNewBadge = isExpanded && (group.id === 'risk' || group.id === 'caution');
+  const sortedItems = [...items]
+    .map((item, index) => ({ item, index }))
+    .sort((a, b) => {
+      const aNew = a.item.isNewEntry ? 1 : 0;
+      const bNew = b.item.isNewEntry ? 1 : 0;
+      if (aNew !== bNew) return bNew - aNew;
+      return a.index - b.index;
+    })
+    .map((entry) => entry.item);
   return (
     <div id={`expiry-group-${group.id}`} className={`border-l-4 ${tone.accent} pl-3`}>
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
@@ -1031,6 +1083,13 @@ function ExpiryGroupSection({
               <div className="flex items-center gap-2">
                 <span className={`h-2 w-2 rounded-full ${tone.dot}`}></span>
                 <h2 className="text-sm font-bold text-gray-900">{group.title}</h2>
+                {newEntryCount > 0 && (
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${tone.badge}`}
+                  >
+                    신규 +{newEntryCount}
+                  </span>
+                )}
               </div>
               <p className="text-[10px] text-gray-400">{group.range}</p>
             </div>
@@ -1065,13 +1124,14 @@ function ExpiryGroupSection({
               </div>
             ) : (
               <div className="space-y-2">
-                {items.map((item) => (
+                {sortedItems.map((item) => (
                   <ExpiryItemCard
                     key={item.id}
                     item={item}
                     tone={tone}
                     onViewInvoice={onViewInvoice}
                     onToggleCheck={onToggleCheck}
+                    showNewBadge={showNewBadge}
                   />
                 ))}
               </div>
@@ -1083,7 +1143,7 @@ function ExpiryGroupSection({
   );
 }
 
-function ExpiryItemCard({ item, tone, onViewInvoice, onToggleCheck }) {
+function ExpiryItemCard({ item, tone, onViewInvoice, onToggleCheck, showNewBadge }) {
   const isExpired = item.status === 'expired';
   const isChecked = item.isChecked;
 
@@ -1091,7 +1151,14 @@ function ExpiryItemCard({ item, tone, onViewInvoice, onToggleCheck }) {
     <div className="rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-gray-900 truncate">{item.productName}</p>
+          <div className="flex items-center gap-1">
+            <p className="text-sm font-semibold text-gray-900 truncate">{item.productName}</p>
+            {showNewBadge && item.isNewEntry && (
+              <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${tone.badge}`}>
+                N
+              </span>
+            )}
+          </div>
           <p className="text-[11px] text-gray-500 truncate">{item.supplierName}</p>
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
