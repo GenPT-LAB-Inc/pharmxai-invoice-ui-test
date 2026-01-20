@@ -367,8 +367,8 @@ export default function ExpiryCheckApp({ onMenuChange }) {
   const [statusFilter, setStatusFilter] = useState('active');
   const [checkedItems, setCheckedItems] = useState(() => new Set());
   const [expandedGroups, setExpandedGroups] = useState({
-    risk: true,
-    caution: true,
+    risk: false,
+    caution: false,
     normal: false,
     safe: false,
   });
