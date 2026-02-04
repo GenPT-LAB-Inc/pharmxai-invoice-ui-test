@@ -2766,17 +2766,18 @@
                 // 입지 기반 스코어 (확정 - 식약처 데이터로 계산)
                 locationScores: {
                     derma_dental_nursing: 98,  // 희소 유사그룹 최상위
-                    size_medium: 88,           // 32㎡ → 중형
-                    multi_clinic: 75,          // 6개 진료과
-                    density_low: 65,           // 3개 병원 → 분산
-                    pediatric_zone: 48,        // 소아청소년과 등록
+                    density_low: 0,
+                    pediatric_zone: 0,
                     ortho_rehab: 0,
                     internal_cluster: 0,
                     density_medium: 0,
                     density_high: 0,
                     size_small: 0,
                     size_large: 0,
-                    general_hospital: 0
+                    size_medium: 0,
+                    multi_clinic: 0,
+                    general_hospital: 0,
+                    derma_beauty: 0
                 },
                 
                 // 5대 Domain 프로파일 (입지 기반)
@@ -3524,7 +3525,7 @@
                 const topGroups = Object.entries(MY_PHARMACY.locationScores)
                     .filter(([, score]) => score > 0)
                     .sort((a, b) => b[1] - a[1])
-                    .slice(0, 2);
+                    .slice(0, 1);
 
                 const isCollecting = MY_PHARMACY.purchaseData.status === 'collecting';
 
