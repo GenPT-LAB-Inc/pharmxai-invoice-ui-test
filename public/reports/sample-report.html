@@ -43,6 +43,26 @@
             /* Ensure all tab panels are visible when printing */
             .mobile-tablist { display: none !important; }
             [data-tab-panel][hidden] { display: block !important; }
+            
+            /* Peer Universe Print Styles */
+            .peer-universe-section {
+                background: #1e293b !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .peer-universe-section .bg-slate-800 {
+                background: #334155 !important;
+            }
+            .topology-map-container {
+                height: 200px;
+                background: #0f172a !important;
+            }
+            .insight-card {
+                page-break-inside: avoid;
+            }
+            .peer-ranking-bar {
+                page-break-inside: avoid;
+            }
         }
         
         .badge-risk { background-color: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; font-weight: 700; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; }
@@ -175,6 +195,636 @@
             font-size: 0.7rem;
         }
 
+        /* Peer Group Universe Styles */
+        .peer-universe-section {
+            --pg-chronic: #6366F1;     /* indigo */
+            --pg-silver: #8B5CF6;      /* violet */
+            --pg-kids: #EC4899;        /* pink */
+            --pg-prescription: #3B82F6; /* blue */
+            --pg-otc: #10B981;         /* emerald */
+            --pg-lean: #F59E0B;        /* amber */
+            --pg-price: #14B8A6;       /* teal */
+            --pg-growth: #EF4444;      /* red */
+        }
+        .topology-map-container {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+        .topology-map-container canvas {
+            width: 100%;
+            height: 100%;
+        }
+        .topology-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        .topology-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.625rem;
+            color: #94a3b8;
+        }
+        .topology-legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .peer-ranking-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+        }
+        .peer-ranking-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+        .peer-ranking-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .peer-ranking-name {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .peer-ranking-track {
+            height: 6px;
+            background: #334155;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .peer-ranking-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+        .peer-ranking-score {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #f1f5f9;
+            min-width: 40px;
+            text-align: right;
+        }
+        .insight-card {
+            background: #1e293b;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border-left: 4px solid;
+        }
+        .insight-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .insight-card-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+        }
+        .insight-card-title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+        .insight-card-score {
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            margin-left: auto;
+        }
+        .insight-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .insight-stat {
+            text-align: center;
+            padding: 0.5rem;
+            background: #0f172a;
+            border-radius: 0.5rem;
+        }
+        .insight-stat-value {
+            font-size: 0.875rem;
+            font-weight: 800;
+            color: #f1f5f9;
+        }
+        .insight-stat-label {
+            font-size: 0.625rem;
+            color: #64748b;
+            margin-top: 2px;
+        }
+        .insight-action {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 0.5rem;
+        }
+        .insight-action-icon {
+            color: #10b981;
+            font-size: 0.75rem;
+            margin-top: 2px;
+        }
+        .insight-action-text {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+        
+        /* Benchmark Table Styles */
+        .benchmark-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.625rem;
+            margin-bottom: 0.75rem;
+        }
+        .benchmark-table th,
+        .benchmark-table td {
+            padding: 0.375rem 0.25rem;
+            text-align: center;
+            border-bottom: 1px solid #334155;
+        }
+        .benchmark-table th {
+            color: #64748b;
+            font-weight: 600;
+            background: #0f172a;
+        }
+        .benchmark-table td {
+            color: #e2e8f0;
+        }
+        .benchmark-table .row-label {
+            text-align: left;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+        .benchmark-table .highlight-cell {
+            font-weight: 800;
+        }
+        .benchmark-table .gap-negative {
+            color: #f87171;
+        }
+        .benchmark-table .gap-positive {
+            color: #4ade80;
+        }
+        .benchmark-table .row-emphasis {
+            background: rgba(217, 70, 239, 0.1);
+        }
+        
+        /* Pattern Item Styles */
+        .pattern-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: #0f172a;
+            border-radius: 0.5rem;
+            margin-bottom: 0.375rem;
+        }
+        .pattern-item:last-child {
+            margin-bottom: 0;
+        }
+        .pattern-rank {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.625rem;
+            font-weight: 800;
+            color: #94a3b8;
+            flex-shrink: 0;
+        }
+        .pattern-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .pattern-name {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 2px;
+        }
+        .pattern-stats {
+            font-size: 0.5625rem;
+            color: #64748b;
+        }
+        .pattern-stats strong {
+            color: #10b981;
+        }
+        .pattern-badge {
+            font-size: 0.5625rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        .pattern-badge-applied {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        .pattern-badge-partial {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+        .pattern-badge-not-applied {
+            background: rgba(248, 113, 113, 0.2);
+            color: #f87171;
+        }
+        
+        /* Strategy Card Styles */
+        .strategy-card {
+            background: linear-gradient(135deg, rgba(217, 70, 239, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 1px solid rgba(217, 70, 239, 0.3);
+            border-radius: 0.75rem;
+            padding: 0.875rem;
+            margin-top: 0.75rem;
+        }
+        .strategy-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.625rem;
+        }
+        .strategy-card-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: rgba(217, 70, 239, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d946ef;
+            font-size: 0.75rem;
+        }
+        .strategy-card-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+        .strategy-priority {
+            margin-left: auto;
+            font-size: 0.5625rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        .strategy-gap-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: #0f172a;
+            border-radius: 0.375rem;
+            margin-bottom: 0.625rem;
+        }
+        .strategy-gap-label {
+            font-size: 0.625rem;
+            color: #64748b;
+        }
+        .strategy-gap-value {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #f87171;
+        }
+        .strategy-gap-arrow {
+            color: #64748b;
+            font-size: 0.75rem;
+        }
+        .strategy-recovery-value {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #10b981;
+        }
+        .action-checklist {
+            margin-bottom: 0.625rem;
+        }
+        .action-checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.375rem;
+            font-size: 0.625rem;
+            color: #94a3b8;
+            margin-bottom: 0.25rem;
+        }
+        .action-checklist-item:last-child {
+            margin-bottom: 0;
+        }
+        .action-checklist-item i {
+            color: #d946ef;
+            margin-top: 2px;
+            font-size: 0.5rem;
+        }
+        .strategy-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 0.5rem;
+            border-top: 1px solid #334155;
+        }
+        .strategy-difficulty {
+            font-size: 0.5625rem;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .strategy-difficulty-easy {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+        }
+        .strategy-difficulty-medium {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+        .strategy-difficulty-hard {
+            background: rgba(248, 113, 113, 0.2);
+            color: #f87171;
+        }
+        
+        /* Category Analysis Section Styles */
+        .category-analysis-section {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .category-analysis-header {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.625rem;
+            font-weight: 700;
+            color: #94a3b8;
+            margin-bottom: 0.625rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+        .category-table-header {
+            display: grid;
+            grid-template-columns: 1fr 60px 60px 50px;
+            gap: 0.25rem;
+            padding: 0.375rem 0.5rem;
+            background: #1e293b;
+            border-radius: 0.25rem;
+            margin-bottom: 0.375rem;
+        }
+        .category-table-header span {
+            font-size: 0.5625rem;
+            font-weight: 600;
+            color: #64748b;
+            text-align: center;
+        }
+        .category-table-header span:first-child {
+            text-align: left;
+        }
+        .category-row {
+            display: grid;
+            grid-template-columns: 1fr 60px 60px 50px;
+            gap: 0.25rem;
+            padding: 0.375rem 0.5rem;
+            border-bottom: 1px solid #1e293b;
+            align-items: center;
+        }
+        .category-row:last-child {
+            border-bottom: none;
+        }
+        .category-name {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.625rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        .category-name i {
+            font-size: 0.5rem;
+            width: 16px;
+            text-align: center;
+        }
+        .category-value {
+            font-size: 0.625rem;
+            font-weight: 700;
+            text-align: center;
+        }
+        .category-value.top-value {
+            color: #10b981;
+        }
+        .category-value.my-value {
+            color: #fbbf24;
+        }
+        .category-gap {
+            font-size: 0.5625rem;
+            font-weight: 800;
+            text-align: center;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .category-gap.negative {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+        .category-gap.positive {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+        .category-insight-box {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 0.375rem;
+        }
+        .category-insight-box p {
+            font-size: 0.5625rem;
+            color: #94a3b8;
+            margin: 0;
+        }
+        .category-insight-box strong {
+            color: #3b82f6;
+        }
+        
+        /* Pattern-Based Strategy Section Styles */
+        .pattern-strategy-section {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(245, 158, 11, 0.04) 100%);
+            border: 1px solid rgba(251, 191, 36, 0.25);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .pattern-strategy-header {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.625rem;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-bottom: 0.625rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+        .pattern-strategy-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+        }
+        .pattern-strategy-card:last-child {
+            margin-bottom: 0;
+        }
+        .pattern-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem;
+            background: rgba(30, 41, 59, 0.5);
+            border-bottom: 1px solid #334155;
+        }
+        .pattern-card-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: rgba(251, 191, 36, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fbbf24;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+        .pattern-card-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .pattern-card-title {
+            font-size: 0.6875rem;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+        .pattern-card-gap {
+            font-size: 0.5625rem;
+            color: #64748b;
+            margin-top: 2px;
+        }
+        .pattern-card-gap .gap-value {
+            color: #ef4444;
+            font-weight: 700;
+        }
+        .pattern-strategies-list {
+            padding: 0.5rem;
+        }
+        .strategy-item {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 0.375rem;
+            margin-bottom: 0.375rem;
+        }
+        .strategy-item:last-child {
+            margin-bottom: 0;
+        }
+        .strategy-target-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            background: rgba(59, 130, 246, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #3b82f6;
+            font-size: 0.625rem;
+            flex-shrink: 0;
+        }
+        .strategy-content {
+            flex: 1;
+            min-width: 0;
+        }
+        .strategy-target-name {
+            font-size: 0.5625rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 2px;
+        }
+        .strategy-items {
+            font-size: 0.5rem;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+        .strategy-items span {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            padding: 1px 4px;
+            border-radius: 2px;
+            margin-right: 3px;
+            margin-bottom: 2px;
+        }
+        
+        /* Benchmark Preview (데이터 수집 중) */
+        .benchmark-preview {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(251, 191, 36, 0.05) 100%);
+            border: 1px dashed rgba(251, 191, 36, 0.4);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            text-align: center;
+            margin-bottom: 0.75rem;
+        }
+        .benchmark-preview-title {
+            font-size: 0.6875rem;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-bottom: 0.375rem;
+        }
+        .benchmark-preview-desc {
+            font-size: 0.5625rem;
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+        }
+        .benchmark-preview-insight {
+            font-size: 0.625rem;
+            font-weight: 600;
+            color: #64748b;
+            font-style: italic;
+            padding: 0.5rem;
+            background: #0f172a;
+            border-radius: 0.375rem;
+        }
+        .insight-action-text strong {
+            color: #10b981;
+        }
+
         /* Mobile screen adjustments */
         @media screen and (max-width: 639px) {
             header.gradient-header {
@@ -303,6 +953,23 @@
             }
             .flow-arrow {
                 font-size: 0.6rem;
+            }
+
+            /* Peer Universe Mobile */
+            .topology-map-container {
+                height: 220px;
+            }
+            .topology-legend {
+                gap: 0.375rem;
+            }
+            .topology-legend-item {
+                font-size: 0.5625rem;
+            }
+            .insight-stat-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .peer-ranking-name {
+                font-size: 0.6875rem;
             }
         }
 
@@ -921,77 +1588,113 @@
                 </div>
             </section>
 
-            <!-- 6. Special Report: PharmxAI Ontology Discovery -->
-            <section class="card-shadow rounded-xl p-0 overflow-hidden bg-slate-900 text-white page-break-inside-avoid page-break">
+            <!-- 6. Peer Group Universe Analysis (Ontology-based) -->
+            <section class="card-shadow rounded-xl p-0 overflow-hidden bg-slate-900 text-white page-break-inside-avoid page-break peer-universe-section" data-mobile-tabs="peer-universe" data-default-tab="map" data-resize-charts="true">
                 <!-- Header -->
-                <div class="bg-slate-800 p-6 flex justify-between items-center border-b border-slate-700 peer-universe-header">
-                    <div class="ko-keepall">
-                        <span class="text-xs font-bold uppercase tracking-widest text-emerald-400 bg-emerald-900 bg-opacity-30 px-2 py-1 rounded">Ontology Discovery</span>
-                        <h2 class="text-2xl font-bold mt-2 text-white">PharmxAI 피어그룹 유니버스</h2>
-                        <p class="text-xs text-slate-400 mt-1">약국 데이터 네트워크 분석 결과</p>
+                <div class="bg-slate-800 p-6 border-b border-slate-700">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold uppercase tracking-widest text-emerald-400 bg-emerald-900 bg-opacity-30 px-2 py-1 rounded">Ontology-based Analysis</span>
+                        <i class="fa-solid fa-diagram-project text-2xl text-emerald-500 opacity-50"></i>
                     </div>
-                    <div class="peer-universe-icon text-right">
-                        <i class="fa-solid fa-project-diagram text-4xl text-emerald-500 opacity-50"></i>
-                    </div>
+                    <h2 class="text-2xl font-bold text-white">유사그룹 유니버스 분석</h2>
+                    <p class="text-xs text-slate-400 mt-1">다차원 약국 특성 기반 포지셔닝 · 행복한 약국</p>
                 </div>
 
-                <div class="p-6">
-                    <p class="ko-keepall text-sm text-gray-400 mb-8 leading-relaxed text-center">
-                        PharmxAI가 <strong>약국과 인접한 병원·배후지역 통계 데이터가 통합된 온톨로지</strong>를 종합 분석하여<br>
-                        행복한 약국과 유사한 <strong>5가지 피어그룹</strong>을 도출했습니다.
+                <!-- Mobile Tabs -->
+                <div class="mobile-tablist sm:hidden mx-4 mt-4" role="tablist" aria-label="유사그룹 분석 탭">
+                    <button type="button" class="tab-btn" role="tab" id="peer-universe-tab-map" data-tab-button="map" aria-controls="peer-universe-panel-map" aria-selected="true" tabindex="0">
+                        <i class="fa-solid fa-circle-nodes mr-1"></i>맵
+                    </button>
+                    <button type="button" class="tab-btn" role="tab" id="peer-universe-tab-ranking" data-tab-button="ranking" aria-controls="peer-universe-panel-ranking" aria-selected="false" tabindex="-1">
+                        <i class="fa-solid fa-ranking-star mr-1"></i>소속
+                    </button>
+                    <button type="button" class="tab-btn" role="tab" id="peer-universe-tab-profile" data-tab-button="profile" aria-controls="peer-universe-panel-profile" aria-selected="false" tabindex="-1">
+                        <i class="fa-solid fa-chart-radar mr-1"></i>프로파일
+                    </button>
+                </div>
+
+                <div class="p-6 space-y-6">
+                    <!-- Description -->
+                    <p class="text-xs text-slate-400 leading-relaxed text-center ko-keepall">
+                        <strong class="text-emerald-400">전국 약국·병원 온톨로지(면적, 위치, 진료과)</strong>를 분석하여<br class="hidden sm:inline">
+                        행복한 약국이 속한 <strong class="text-white">유사그룹</strong>들을 도출했습니다.
                     </p>
 
-                    <div class="peer-universe-cards grid grid-cols-2 gap-3 ko-keepall">
-                        <!-- Card 1 -->
-                        <div class="flex items-start space-x-3 p-4 rounded bg-slate-800 border-l-4 border-blue-500">
-                            <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-graduation-cap text-blue-400"></i></div>
-                            <div>
-                                <div class="flex justify-between items-center w-full mb-1">
-                                    <h4 class="text-sm font-bold text-white">학원가 집중형 (94%)</h4>
+                    <!-- A. Topology Map -->
+                    <div data-tab-panel="map" id="peer-universe-panel-map" role="tabpanel" aria-labelledby="peer-universe-tab-map">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-nodes text-emerald-400"></i>
+                            전국 약국 포지셔닝 맵
+                        </h4>
+                        <div class="topology-map-container" id="topologyMapContainer">
+                            <canvas id="topologyMapCanvas"></canvas>
+                        </div>
+                        <div class="topology-legend mt-3" id="topologyLegend"></div>
+                        <p class="text-[10px] text-slate-500 text-center mt-2">
+                            <i class="fa-solid fa-circle-info mr-1"></i>
+                            X축: 약국 면적(㎡) · Y축: 인근 의료기관 수 · 전국 약 25,000개 약국 분포 기준
+                        </p>
+                    </div>
+
+                    <!-- B + C: Ranking + Radar (2 columns on desktop) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- B. Peer Group Ranking -->
+                        <div data-tab-panel="ranking" id="peer-universe-panel-ranking" role="tabpanel" aria-labelledby="peer-universe-tab-ranking" class="bg-slate-800 rounded-xl p-4">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-ranking-star text-amber-400"></i>
+                                소속 유사그룹 분석
+                            </h4>
+                            <!-- 동일 건물 의료기관 정보 -->
+                            <div class="mb-4 p-3 bg-slate-700/50 rounded-lg border border-slate-600">
+                                <div class="text-[10px] text-fuchsia-400 font-bold mb-2 flex items-center gap-1">
+                                    <i class="fa-solid fa-building"></i>
+                                    동일 건물 의료기관
                                 </div>
-                                <p class="text-xs text-gray-400">학원가 밀집 지역으로 하원 시간대(17-19시) 청소년 처방 유입이 집중됨.</p>
+                                <div class="space-y-1.5" id="sameBuildingInfo"></div>
+                                <div class="mt-2 pt-2 border-t border-slate-600">
+                                    <div class="text-[10px] text-slate-400 font-bold mb-1 flex items-center gap-1">
+                                        <i class="fa-solid fa-location-dot"></i>
+                                        인근 의료기관 (500m)
+                                    </div>
+                                    <div class="space-y-1" id="nearbyHospitalsInfo"></div>
+                                </div>
+                            </div>
+                            <div id="peerGroupRanking" class="space-y-1"></div>
+                            <p class="text-[10px] text-slate-500 mt-3 pt-2 border-t border-slate-700">
+                                <i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i>
+                                입지 기반 50% 이상 소속: <span id="highMembershipCount" class="font-bold text-emerald-400">0</span>개
+                            </p>
+                        </div>
+
+                        <!-- C. Profile Radar -->
+                        <div data-tab-panel="profile" id="peer-universe-panel-profile" role="tabpanel" aria-labelledby="peer-universe-tab-profile" class="bg-slate-800 rounded-xl p-4">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-radar text-blue-400"></i>
+                                입지 프로파일 비교
+                            </h4>
+                            <div class="h-48">
+                                <canvas id="profileRadarChart"></canvas>
+                            </div>
+                            <div class="flex justify-center gap-4 mt-2 text-[10px]">
+                                <span class="flex items-center gap-1">
+                                    <span class="w-3 h-0.5 bg-emerald-400 rounded"></span>
+                                    <span class="text-slate-400">내 약국</span>
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <span class="w-3 h-0.5 bg-blue-400 rounded opacity-50"></span>
+                                    <span class="text-slate-400">전국 평균</span>
+                                </span>
                             </div>
                         </div>
-                        <!-- Card 2 -->
-                        <div class="flex items-start space-x-3 p-4 rounded bg-slate-800 border-l-4 border-purple-500">
-                            <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-boxes-packing text-purple-400"></i></div>
-                            <div>
-                                <div class="flex justify-between items-center w-full mb-1">
-                                    <h4 class="text-sm font-bold text-white">재고 고회전형 (91%)</h4>
-                                </div>
-                                <p class="text-xs text-gray-400">소형 평수의 한계를 빈번한 주문(High Frequency)으로 극복하며 재고 비용을 최소화하는 운영 고수입니다.</p>
-                            </div>
-                        </div>
-                        <!-- Card 3 -->
-                        <div class="flex items-start space-x-3 p-4 rounded bg-slate-800 border-l-4 border-green-500">
-                            <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-notes-medical text-green-400"></i></div>
-                            <div>
-                                <div class="flex justify-between items-center w-full mb-1">
-                                    <h4 class="text-sm font-bold text-white">장기 처방형 (89%)</h4>
-                                </div>
-                                <p class="text-xs text-gray-400">30일 이상 장기 처방 조제 비율 80% 이상. 단골 환자 의존도 높음.</p>
-                            </div>
-                        </div>
-                        <!-- Card 4 -->
-                        <div class="flex items-start space-x-3 p-4 rounded bg-slate-800 border-l-4 border-yellow-500">
-                            <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-crown text-yellow-400"></i></div>
-                            <div>
-                                <div class="flex justify-between items-center w-full mb-1">
-                                    <h4 class="text-sm font-bold text-white">프리미엄 실버형 (88%)</h4>
-                                </div>
-                                <p class="text-xs text-gray-400">소득 상위 20% 지역 + 노인 인구. 고가 건기식 및 프리미엄 드링크 구매력 높음.</p>
-                            </div>
-                        </div>
-                        <!-- Card 5 -->
-                        <div class="flex items-start space-x-3 p-4 rounded bg-slate-800 border-l-4 border-sky-500">
-                            <div class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-cloud-sun text-sky-400"></i></div>
-                            <div>
-                                <div class="flex justify-between items-center w-full mb-1">
-                                    <h4 class="text-sm font-bold text-white">날씨 민감형 (85%)</h4>
-                                </div>
-                                <p class="text-xs text-gray-400">기온 급변 시 호흡기 질환 환자 즉각 반응. 날씨 기반 재고 관리 필요.</p>
-                            </div>
-                        </div>
+                    </div>
+
+                    <!-- D. Insight Cards -->
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-lightbulb text-yellow-400"></i>
+                            유사그룹 인사이트
+                        </h4>
+                        <div id="peerGroupInsights" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
                     </div>
                 </div>
             </section>
@@ -1546,6 +2249,1351 @@
                 }
             }
         });
+
+        // --- 6. Peer Group Universe Analysis (Ontology-based) ---
+        (function initPeerGroupUniverse() {
+            // === ONTOLOGY-BASED PEER GROUPS (12 types) ===
+            // Based on immediately available data: store_area, NEARBY, Hospital, Department
+            
+            const PEER_GROUPS = {
+                // === A. 약국 규모 기반 (store_area) ===
+                size_small: {
+                    id: 'size_small',
+                    name: '소형 약국',
+                    icon: 'fa-store',
+                    color: '#8B5CF6',
+                    domain: 'scale',
+                    description: '면적 20㎡ 미만의 소규모 약국',
+                    characteristics: ['효율적 재고 관리 필수', '고회전 품목 중심 운영', '주력 품목 선택과 집중'],
+                    nationalRatio: 35,
+                    expectedCategories: ['상비약류', '드링크', '마스크'],
+                    typicalRegion: '역세권, 오피스 밀집 지역'
+                },
+                size_medium: {
+                    id: 'size_medium',
+                    name: '중형 약국',
+                    icon: 'fa-building',
+                    color: '#3B82F6',
+                    domain: 'scale',
+                    description: '면적 20-50㎡의 일반적인 약국',
+                    characteristics: ['균형 잡힌 품목 구성 가능', '지역 밀착형 서비스', '적정 재고 유지 용이'],
+                    nationalRatio: 48,
+                    expectedCategories: ['다양한 ETC', 'OTC', '건기식'],
+                    typicalRegion: '주거 상업 복합 지역'
+                },
+                size_large: {
+                    id: 'size_large',
+                    name: '대형 약국',
+                    icon: 'fa-warehouse',
+                    color: '#10B981',
+                    domain: 'scale',
+                    description: '면적 50㎡ 이상의 대형 약국',
+                    characteristics: ['다양한 품목 구비 가능', '건기식/의약외품 코너 운영', '복수 약사 근무 환경'],
+                    nationalRatio: 17,
+                    expectedCategories: ['프리미엄 건기식', '의료기기', '뷰티'],
+                    typicalRegion: '대형 상권, 종합병원 인근'
+                },
+
+                // === B. 의료 밀집도 기반 (NEARBY) ===
+                density_high: {
+                    id: 'density_high',
+                    name: '의료 밀집형',
+                    icon: 'fa-hospital',
+                    color: '#EF4444',
+                    domain: 'location',
+                    description: '반경 500m 내 병의원 10개 이상 밀집',
+                    characteristics: ['처방전 유입 다양함', '경쟁 약국도 다수 존재', '다양한 진료과 대응 필요'],
+                    nationalRatio: 22,
+                    expectedCategories: ['다양한 ETC', '항생제', '진통소염제'],
+                    typicalRegion: '역세권, 의료 특화 상권'
+                },
+                density_medium: {
+                    id: 'density_medium',
+                    name: '의료 적정형',
+                    icon: 'fa-house-medical',
+                    color: '#F59E0B',
+                    domain: 'location',
+                    description: '반경 500m 내 병의원 5-9개 분포',
+                    characteristics: ['안정적 처방전 유입', '특정 진료과 특화 가능', '단골 환자 확보 유리'],
+                    nationalRatio: 45,
+                    expectedCategories: ['주요 ETC', 'OTC', '건기식'],
+                    typicalRegion: '주거 상업 복합 지역'
+                },
+                density_low: {
+                    id: 'density_low',
+                    name: '의료 분산형',
+                    icon: 'fa-house',
+                    color: '#6B7280',
+                    domain: 'location',
+                    description: '반경 500m 내 병의원 4개 이하',
+                    characteristics: ['OTC/셀프케어 비중 높음', '지역 단골 중심 운영', '건기식/생활용품 확대 고려'],
+                    nationalRatio: 33,
+                    expectedCategories: ['OTC', '건기식', '생활용품'],
+                    typicalRegion: '주거 밀집 지역, 외곽'
+                },
+
+                // === C. 진료과 조합 기반 (Department, HAS_DEPT) ===
+                internal_cluster: {
+                    id: 'internal_cluster',
+                    name: '내과 클러스터',
+                    icon: 'fa-heart-pulse',
+                    color: '#DC2626',
+                    domain: 'medical',
+                    description: '인근 내과 계열 병의원 비중 40% 이상',
+                    characteristics: ['만성질환 약물 매입 비중 높음', '장기 복용 환자 단골화', '순환기계/당뇨 약물 재고 필수'],
+                    nationalRatio: 28,
+                    expectedCategories: ['순환기계', '당뇨병용제', '소화제'],
+                    typicalRegion: '중장년층 거주 지역'
+                },
+                pediatric_zone: {
+                    id: 'pediatric_zone',
+                    name: '소아과 밀집',
+                    icon: 'fa-baby',
+                    color: '#EC4899',
+                    domain: 'medical',
+                    description: '인근 소아청소년과 2개 이상 밀집',
+                    characteristics: ['호흡기계 매입 계절 변동 큼', '소아용 비타민/영양제 수요', '환절기 재고 선제 확보 필요'],
+                    nationalRatio: 15,
+                    expectedCategories: ['진해거담제', '해열진통제', '소아비타민'],
+                    typicalRegion: '학원가, 신도시'
+                },
+                derma_beauty: {
+                    id: 'derma_beauty',
+                    name: '피부과 인접',
+                    icon: 'fa-spa',
+                    color: '#F472B6',
+                    domain: 'medical',
+                    description: '인근 피부과/성형외과 존재',
+                    characteristics: ['피부과용 외용제 수요', '이너뷰티 건기식 니즈', '미용 관련 의약외품 가능성'],
+                    nationalRatio: 12,
+                    expectedCategories: ['피부과용제', '항히스타민제', '콜라겐/비오틴'],
+                    typicalRegion: '번화가, 젊은층 상권'
+                },
+                ortho_rehab: {
+                    id: 'ortho_rehab',
+                    name: '정형/재활 인접',
+                    icon: 'fa-bone',
+                    color: '#14B8A6',
+                    domain: 'medical',
+                    description: '인근 정형외과/재활의학과 존재',
+                    characteristics: ['진통소염제 매입 비중 높음', '근골격계 영양제 수요', '파스/외용제 회전율 높음'],
+                    nationalRatio: 18,
+                    expectedCategories: ['해열진통소염제', 'MSM/글루코사민', '파스류'],
+                    typicalRegion: '주거 지역, 시니어 타운'
+                },
+                general_hospital: {
+                    id: 'general_hospital',
+                    name: '종합병원 인접',
+                    icon: 'fa-hospital-user',
+                    color: '#7C3AED',
+                    domain: 'medical',
+                    description: '반경 500m 내 종합병원 존재',
+                    characteristics: ['다양한 전문 처방 유입', '고가 전문의약품 비중', '희귀/특수 약물 수요 가능'],
+                    nationalRatio: 8,
+                    expectedCategories: ['항암보조제', '면역억제제', '전문영양제'],
+                    typicalRegion: '대학병원가, 의료 특구'
+                },
+                multi_clinic: {
+                    id: 'multi_clinic',
+                    name: '다과목 의원 복합',
+                    icon: 'fa-staff-snake',
+                    color: '#0EA5E9',
+                    domain: 'medical',
+                    description: '인근 5개 이상 다양한 진료과 분포',
+                    characteristics: ['균형 잡힌 품목 구성 필요', '특정 카테고리 쏠림 적음', '범용 의약품 회전율 높음'],
+                    nationalRatio: 25,
+                    expectedCategories: ['항생제', '소화제', '진해거담제'],
+                    typicalRegion: '복합 상권, 역세권'
+                },
+
+                // === D. 특수 복합 유사그룹 ===
+                derma_dental_nursing: {
+                    id: 'derma_dental_nursing',
+                    name: '피부·치과·요양 복합',
+                    icon: 'fa-building-user',
+                    color: '#D946EF',
+                    domain: 'special',
+                    description: '피부과·치과가 동일 건물에 위치하고 인근에 요양병원이 있는 특수 입지',
+                    characteristics: [
+                        '피부과 외용제 + 이너뷰티 수요 높음',
+                        '치과 진통제·항생제 처방 유입',
+                        '고령층 만성질환 약물 수요 병존'
+                    ],
+                    nationalRatio: 1.7,
+                    estimatedCount: 420,
+                    expectedCategories: ['피부과용제', '진통소염제', '만성질환약', '이너뷰티'],
+                    typicalRegion: '복합 상가 건물, 역세권 메디컬 빌딩',
+                    
+                    // === 유사그룹 내 매입 벤치마크 데이터 ===
+                    benchmark: {
+                        etc: { 
+                            label: 'ETC 매입',
+                            description: '처방전 기반 (입지에 좌우)',
+                            peerAvg: 2800,      // 유사그룹 평균 월 매입액 (만원)
+                            peerTop10: 3200,    // 상위 10% 평균
+                            myPharmacy: 2650    // 내 약국 (가상)
+                        },
+                        otcHealth: { 
+                            label: 'OTC/건기식 매입',
+                            description: '추천 판매 (역량에 좌우)',
+                            peerAvg: 850,       // 유사그룹 평균
+                            peerTop10: 1450,    // 상위 10% (역량 우수 약국)
+                            myPharmacy: 720,    // 내 약국
+                            gap: -130,          // 평균 대비 Gap
+                            gapVsTop: -730,     // 상위 10% 대비 Gap
+                            percentile: 38      // 내 약국 백분위
+                        }
+                    },
+                    
+                    // === 상위 약국 매입 구성 특성 ===
+                    topPerformerPatterns: [
+                        { 
+                            category: '이너뷰티',
+                            pattern: '이너뷰티 카테고리 매입 비중 높음',
+                            topAvgRatio: 25,        // 상위 약국 평균 비중 (%)
+                            myRatio: 12,            // 내 약국 비중 (%)
+                            gapPercent: -13,        // 비중 Gap (%p)
+                            insight: '피부과 환자 대상 추천 판매 활발 추정',
+                            applied: false
+                        },
+                        { 
+                            category: '구강케어',
+                            pattern: '구강케어 제품 라인업 보유',
+                            topAvgRatio: 8,
+                            myRatio: 3,
+                            gapPercent: -5,
+                            insight: '치과 환자 대상 세트 판매 추정',
+                            applied: false 
+                        },
+                        { 
+                            category: '시니어 영양제',
+                            pattern: '고령층 영양제 매입 비중 높음',
+                            topAvgRatio: 18,
+                            myRatio: 10,
+                            gapPercent: -8,
+                            insight: '요양병원 보호자 대상 상담 판매 추정',
+                            applied: 'partial'
+                        }
+                    ],
+                    
+                    // === 매입 포트폴리오 최적화 전략 ===
+                    strategies: [
+                        {
+                            type: 'portfolio',
+                            icon: 'fa-chart-pie',
+                            title: '이너뷰티 매입 비중 확대',
+                            currentRatio: 12,
+                            targetRatio: 25,
+                            ratioGap: '-13%p',
+                            targetCategory: '이너뷰티',
+                            actionItems: [
+                                '콜라겐·비오틴·히알루론산 SKU 확대',
+                                '피부과 처방 조제 시 이너뷰티 추천 시도',
+                                '피부 시술 후 회복 세트 구성 (비타민C+콜라겐)'
+                            ],
+                            expectedPurchaseIncrease: '+110만원/월',
+                            insight: '상위 약국 수준 도달 시 동일 판매 여건 확보',
+                            difficulty: 'easy',
+                            priority: 'high'
+                        },
+                        {
+                            type: 'portfolio',
+                            icon: 'fa-tooth',
+                            title: '구강케어 라인업 확보',
+                            currentRatio: 3,
+                            targetRatio: 8,
+                            ratioGap: '-5%p',
+                            targetCategory: '구강케어',
+                            actionItems: [
+                                '구강 청결제·치실·잇몸영양제 라인업 구비',
+                                '치과 시술 후 케어 세트 구성',
+                                '발치/임플란트 환자용 상비품 확보'
+                            ],
+                            expectedPurchaseIncrease: '+45만원/월',
+                            insight: '치과 환자 대상 추가 판매 기회 확보',
+                            difficulty: 'easy',
+                            priority: 'high'
+                        },
+                        {
+                            type: 'portfolio',
+                            icon: 'fa-heart-pulse',
+                            title: '시니어 영양제 비중 확대',
+                            currentRatio: 10,
+                            targetRatio: 18,
+                            ratioGap: '-8%p',
+                            targetCategory: '시니어 영양제',
+                            actionItems: [
+                                '칼슘·비타민D·오메가3 라인업 확대',
+                                '관절/뼈 건강 영양제 SKU 추가',
+                                '요양병원 보호자 대상 상담 강화'
+                            ],
+                            expectedPurchaseIncrease: '+70만원/월',
+                            insight: '요양병원 연계 고객 확보 기반 마련',
+                            difficulty: 'medium',
+                            priority: 'medium'
+                        }
+                    ],
+                    
+                    // === 상위 약국 OTC 카테고리 분석 데이터 ===
+                    topOtcCategories: [
+                        { 
+                            name: '진통소염제',
+                            icon: 'fa-pills',
+                            topAvgRatio: 18,
+                            myRatio: 12,
+                            gap: -6,
+                            reasoning: '치과/정형 환자 대상 추천 판매 활발',
+                            recommendedItems: ['타이레놀', '이지엔6', '애드빌'],
+                            priority: 'high'
+                        },
+                        { 
+                            name: '피부외용제',
+                            icon: 'fa-pump-medical',
+                            topAvgRatio: 15,
+                            myRatio: 8,
+                            gap: -7,
+                            reasoning: '피부과 처방 연계 OTC 추천 활발',
+                            recommendedItems: ['피지오겔', '세타필', '아토베리어'],
+                            priority: 'high'
+                        },
+                        { 
+                            name: '구강케어',
+                            icon: 'fa-tooth',
+                            topAvgRatio: 10,
+                            myRatio: 4,
+                            gap: -6,
+                            reasoning: '치과 환자 대상 세트 판매',
+                            recommendedItems: ['리스테린', '가글린', '센소다인'],
+                            priority: 'high'
+                        },
+                        { 
+                            name: '위장관용제',
+                            icon: 'fa-stomach',
+                            topAvgRatio: 12,
+                            myRatio: 14,
+                            gap: 2,
+                            reasoning: '내과계 처방 연계 수요',
+                            recommendedItems: ['겔포스', '개비스콘', '훼스탈'],
+                            priority: 'low'
+                        },
+                        { 
+                            name: '비타민드링크',
+                            icon: 'fa-bottle-droplet',
+                            topAvgRatio: 8,
+                            myRatio: 5,
+                            gap: -3,
+                            reasoning: '피로회복 및 시술 후 영양 보충',
+                            recommendedItems: ['박카스', '비타500', '에너씨슬'],
+                            priority: 'medium'
+                        }
+                    ],
+                    
+                    // === 상위 약국 건기식 카테고리 분석 데이터 ===
+                    topHealthCategories: [
+                        {
+                            name: '이너뷰티',
+                            icon: 'fa-sparkles',
+                            topAvgRatio: 25,
+                            myRatio: 12,
+                            gap: -13,
+                            reasoning: '피부과 환자 대상 콜라겐/비오틴 추천',
+                            recommendedItems: ['콜라겐', '비오틴', '히알루론산'],
+                            targetCustomer: '20-40대 여성',
+                            priority: 'high'
+                        },
+                        {
+                            name: '시니어영양제',
+                            icon: 'fa-user',
+                            topAvgRatio: 18,
+                            myRatio: 10,
+                            gap: -8,
+                            reasoning: '요양병원 보호자 대상 상담 판매',
+                            recommendedItems: ['칼슘', '비타민D', '루테인'],
+                            targetCustomer: '60대 이상',
+                            priority: 'high'
+                        },
+                        {
+                            name: '유산균',
+                            icon: 'fa-bacteria',
+                            topAvgRatio: 15,
+                            myRatio: 12,
+                            gap: -3,
+                            reasoning: '장건강 및 피부건강 연계 추천',
+                            recommendedItems: ['락토핏', '듀오락', '프로바이오틱스'],
+                            targetCustomer: '전 연령',
+                            priority: 'medium'
+                        },
+                        {
+                            name: '오메가3',
+                            icon: 'fa-fish',
+                            topAvgRatio: 10,
+                            myRatio: 8,
+                            gap: -2,
+                            reasoning: '혈행개선 및 눈건강 니즈',
+                            recommendedItems: ['알티지오메가3', 'rTG오메가3', '눈건강오메가'],
+                            targetCustomer: '40대 이상',
+                            priority: 'low'
+                        },
+                        {
+                            name: '관절영양제',
+                            icon: 'fa-bone',
+                            topAvgRatio: 12,
+                            myRatio: 10,
+                            gap: -2,
+                            reasoning: '고령층 관절건강 니즈',
+                            recommendedItems: ['MSM', '글루코사민', '초록입홍합'],
+                            targetCustomer: '50대 이상',
+                            priority: 'low'
+                        }
+                    ],
+                    
+                    // === 상위 약국 패턴 기반 추천 전략 ===
+                    topPerformerCommonPatterns: [
+                        {
+                            pattern: '처방 연계 추천 판매',
+                            icon: 'fa-prescription',
+                            description: '조제 시 관련 OTC/건기식 적극 추천',
+                            conversionRate: 23,
+                            avgUpsell: 12000,
+                            myExecutionRate: 8,
+                            gapRate: -15,
+                            difficulty: 'easy',
+                            strategies: [
+                                {
+                                    target: '피부과 처방 환자',
+                                    targetIcon: 'fa-spa',
+                                    recommendedItems: ['콜라겐', '비오틴', '히알루론산']
+                                },
+                                {
+                                    target: '치과 처방 환자',
+                                    targetIcon: 'fa-tooth',
+                                    recommendedItems: ['구강청결제', '잇몸영양제', '구강보습젤']
+                                },
+                                {
+                                    target: '요양병원 연계 고객',
+                                    targetIcon: 'fa-user',
+                                    recommendedItems: ['칼슘+비타민D', '오메가3', '루테인']
+                                }
+                            ]
+                        },
+                        {
+                            pattern: '시즌별 프로모션',
+                            icon: 'fa-calendar-days',
+                            description: '계절/이벤트 맞춤 건기식 기획전',
+                            conversionRate: 18,
+                            avgUpsell: 8000,
+                            myExecutionRate: 5,
+                            gapRate: -13,
+                            difficulty: 'medium',
+                            strategies: [
+                                {
+                                    target: '봄철 (3-5월)',
+                                    targetIcon: 'fa-sun',
+                                    recommendedItems: ['알러지 영양제', '피부 보습', '비타민C']
+                                },
+                                {
+                                    target: '여름철 (6-8월)',
+                                    targetIcon: 'fa-umbrella-beach',
+                                    recommendedItems: ['자외선케어', '이너뷰티', '피로회복제']
+                                },
+                                {
+                                    target: '겨울철 (11-2월)',
+                                    targetIcon: 'fa-snowflake',
+                                    recommendedItems: ['면역 영양제', '관절 영양제', '보습제']
+                                }
+                            ]
+                        },
+                        {
+                            pattern: '세트 상품 구성',
+                            icon: 'fa-box-open',
+                            description: '타겟 고객별 번들 상품 운영',
+                            conversionRate: 15,
+                            avgUpsell: 15000,
+                            myExecutionRate: 3,
+                            gapRate: -12,
+                            difficulty: 'easy',
+                            strategies: [
+                                {
+                                    target: '피부 시술 후 회복 세트',
+                                    targetIcon: 'fa-sparkles',
+                                    recommendedItems: ['비타민C + 콜라겐 + 상처연고']
+                                },
+                                {
+                                    target: '시니어 종합 건강 세트',
+                                    targetIcon: 'fa-heart-pulse',
+                                    recommendedItems: ['칼슘+D + 오메가3 + 루테인']
+                                },
+                                {
+                                    target: '구강 케어 종합 세트',
+                                    targetIcon: 'fa-tooth',
+                                    recommendedItems: ['구강청결제 + 치실 + 잇몸영양제']
+                                }
+                            ]
+                        }
+                    ]
+                }
+            };
+
+            // My Pharmacy Profile (Ontology-based)
+            const MY_PHARMACY = {
+                name: '행복한 약국',
+                
+                // === 확정 데이터 (식약처 빅데이터) ===
+                storeArea: 32,  // ㎡
+                
+                // 인근 병원 분석 (NEARBY 기반)
+                nearby: {
+                    totalHospitals: 3,
+                    distance: 500,
+                    byType: {
+                        '피부과': 1,
+                        '치과': 1,
+                        '요양병원': 1
+                    },
+                    // 동일 건물 의료기관 상세
+                    sameBuilding: [
+                        { type: '피부과', name: '미소피부과의원', depts: ['피부과', '가정의학과', '소아청소년과', '성형외과'] },
+                        { type: '치과', name: '행복치과의원', depts: ['치과'] }
+                    ],
+                    // 인근 의료기관 (동일 건물 외)
+                    nearbyHospitals: [
+                        { type: '요양병원', name: '사랑요양병원', distance: 350 }
+                    ],
+                    uniqueDepartments: 6,  // 피부과, 가정의학과, 소아청소년과, 성형외과, 치과, 요양
+                    totalSpecialists: 8
+                },
+                
+                // 입지 기반 스코어 (확정 - 식약처 데이터로 계산)
+                locationScores: {
+                    derma_dental_nursing: 98,  // 희소 유사그룹 최상위
+                    derma_beauty: 92,          // 피부과 동일 건물
+                    size_medium: 88,           // 32㎡ → 중형
+                    multi_clinic: 75,          // 6개 진료과
+                    density_low: 65,           // 3개 병원 → 분산
+                    pediatric_zone: 48,        // 소아청소년과 등록
+                    ortho_rehab: 0,
+                    internal_cluster: 0,
+                    density_medium: 0,
+                    density_high: 0,
+                    size_small: 0,
+                    size_large: 0,
+                    general_hospital: 0
+                },
+                
+                // 5대 Domain 프로파일 (입지 기반)
+                profile: {
+                    storeSize: 65,        // 약국 규모 백분위
+                    medicalDensity: 72,   // 의료 밀집도 백분위
+                    deptDiversity: 78,    // 진료과 다양성
+                    specialistConc: 68,   // 전문의 집중도
+                    internalRatio: 82     // 내과 비중
+                },
+                
+                // 매입 기반 (수집 중)
+                purchaseData: {
+                    status: 'collecting',
+                    monthsCollected: 2,
+                    expectedGroups: ['만성질환 케어형', '고회전 린 운영형']
+                }
+            };
+
+            // 전국 평균 프로파일 (참조용)
+            const AVG_PROFILE = {
+                storeSize: 50,
+                medicalDensity: 50,
+                deptDiversity: 50,
+                specialistConc: 50,
+                internalRatio: 50
+            };
+
+            // Generate 100 virtual pharmacies for topology map
+            // X축: 약국 면적 (storeArea), Y축: 의료 밀집도 (hospitalCount)
+            const generatePharmacyUniverse = () => {
+                const pharmacies = [];
+                
+                // 약국 규모별, 밀집도별 분포 생성
+                const distributions = [
+                    // 소형 + 밀집 (역세권 소형약국)
+                    { xRange: [0.05, 0.25], yRange: [0.7, 0.95], count: 12, color: '#8B5CF6' },
+                    // 소형 + 적정
+                    { xRange: [0.05, 0.25], yRange: [0.35, 0.65], count: 15, color: '#8B5CF6' },
+                    // 소형 + 분산
+                    { xRange: [0.05, 0.25], yRange: [0.05, 0.3], count: 8, color: '#8B5CF6' },
+                    // 중형 + 밀집
+                    { xRange: [0.3, 0.6], yRange: [0.7, 0.95], count: 10, color: '#3B82F6' },
+                    // 중형 + 적정 (가장 많음)
+                    { xRange: [0.3, 0.6], yRange: [0.35, 0.65], count: 25, color: '#3B82F6' },
+                    // 중형 + 분산
+                    { xRange: [0.3, 0.6], yRange: [0.05, 0.3], count: 12, color: '#3B82F6' },
+                    // 대형 + 밀집
+                    { xRange: [0.65, 0.95], yRange: [0.7, 0.95], count: 6, color: '#10B981' },
+                    // 대형 + 적정
+                    { xRange: [0.65, 0.95], yRange: [0.35, 0.65], count: 8, color: '#10B981' },
+                    // 대형 + 분산
+                    { xRange: [0.65, 0.95], yRange: [0.05, 0.3], count: 4, color: '#10B981' }
+                ];
+
+                distributions.forEach((dist, distIdx) => {
+                    for (let i = 0; i < dist.count; i++) {
+                        const x = dist.xRange[0] + Math.random() * (dist.xRange[1] - dist.xRange[0]);
+                        const y = dist.yRange[0] + Math.random() * (dist.yRange[1] - dist.yRange[0]);
+                        pharmacies.push({
+                            id: `p_${distIdx}_${i}`,
+                            x: x,
+                            y: y,
+                            color: dist.color,
+                            size: 3 + Math.random() * 2  // 점 크기 변화
+                        });
+                    }
+                });
+
+                // "내 약국" 위치: 32㎡(중형, x≈0.45), 3개 병원(분산, y≈0.22)
+                pharmacies.push({
+                    id: 'my_pharmacy',
+                    x: 0.45,
+                    y: 0.22,
+                    color: '#D946EF',  // 희소 유사그룹 색상
+                    isMe: true
+                });
+
+                return pharmacies;
+            };
+
+            const PHARMACY_UNIVERSE = generatePharmacyUniverse();
+
+            // === RENDERING FUNCTIONS ===
+
+            // Render Topology Map (면적 x 밀집도)
+            const renderTopologyMap = () => {
+                const container = document.getElementById('topologyMapContainer');
+                const canvas = document.getElementById('topologyMapCanvas');
+                if (!container || !canvas) return;
+
+                const ctx = canvas.getContext('2d');
+                const dpr = window.devicePixelRatio || 1;
+                const rect = container.getBoundingClientRect();
+                
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                canvas.style.width = rect.width + 'px';
+                canvas.style.height = rect.height + 'px';
+                ctx.scale(dpr, dpr);
+
+                const width = rect.width;
+                const height = rect.height;
+                const padding = 35;
+
+                // Clear
+                ctx.clearRect(0, 0, width, height);
+
+                // Draw axis labels
+                ctx.fillStyle = '#64748b';
+                ctx.font = "bold 9px 'Noto Sans KR', sans-serif";
+                
+                // X축 레이블 (약국 면적)
+                ctx.textAlign = 'center';
+                ctx.fillText('소형', padding + (width - padding * 2) * 0.15, height - 8);
+                ctx.fillText('중형', padding + (width - padding * 2) * 0.5, height - 8);
+                ctx.fillText('대형', padding + (width - padding * 2) * 0.85, height - 8);
+                
+                // Y축 레이블 (의료 밀집도)
+                ctx.save();
+                ctx.translate(12, height / 2);
+                ctx.rotate(-Math.PI / 2);
+                ctx.textAlign = 'center';
+                ctx.fillText('의료 밀집도 →', 0, 0);
+                ctx.restore();
+
+                // Y축 값
+                ctx.textAlign = 'right';
+                ctx.fillText('분산', padding - 5, height - padding - 10);
+                ctx.fillText('적정', padding - 5, height / 2);
+                ctx.fillText('밀집', padding - 5, padding + 15);
+
+                // Draw grid lines
+                ctx.strokeStyle = 'rgba(71, 85, 105, 0.15)';
+                ctx.lineWidth = 1;
+                
+                // 수직선 (규모 구분)
+                [0.25, 0.5, 0.75].forEach(ratio => {
+                    const x = padding + (width - padding * 2) * ratio;
+                    ctx.beginPath();
+                    ctx.setLineDash([4, 4]);
+                    ctx.moveTo(x, padding);
+                    ctx.lineTo(x, height - padding);
+                    ctx.stroke();
+                });
+                
+                // 수평선 (밀집도 구분)
+                [0.33, 0.66].forEach(ratio => {
+                    const y = padding + (height - padding * 2) * ratio;
+                    ctx.beginPath();
+                    ctx.moveTo(padding, y);
+                    ctx.lineTo(width - padding, y);
+                    ctx.stroke();
+                });
+                ctx.setLineDash([]);
+
+                // Draw pharmacies
+                PHARMACY_UNIVERSE.forEach(pharmacy => {
+                    const x = padding + pharmacy.x * (width - padding * 2);
+                    const y = height - padding - pharmacy.y * (height - padding * 2);  // Y축 반전
+                    
+                    if (pharmacy.isMe) {
+                        // 희소 유사그룹 영역 표시 (점선 원)
+                        ctx.beginPath();
+                        ctx.arc(x, y, 28, 0, Math.PI * 2);
+                        ctx.strokeStyle = '#D946EF';
+                        ctx.setLineDash([4, 4]);
+                        ctx.lineWidth = 1.5;
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                        
+                        // 희소 영역 레이블
+                        ctx.fillStyle = '#D946EF';
+                        ctx.font = "bold 8px 'Noto Sans KR', sans-serif";
+                        ctx.textAlign = 'center';
+                        ctx.fillText('희소 입지', x, y + 38);
+                        ctx.fillText('(420개)', x, y + 48);
+
+                        // My pharmacy - larger and highlighted
+                        ctx.beginPath();
+                        ctx.arc(x, y, 14, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(16, 185, 129, 0.25)';
+                        ctx.fill();
+                        
+                        ctx.beginPath();
+                        ctx.arc(x, y, 9, 0, Math.PI * 2);
+                        ctx.fillStyle = '#10B981';
+                        ctx.fill();
+                        ctx.strokeStyle = '#ffffff';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+
+                        // Label
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = "bold 10px 'Noto Sans KR', sans-serif";
+                        ctx.textAlign = 'center';
+                        ctx.fillText('내 약국', x, y - 20);
+                        ctx.font = "9px 'Noto Sans KR', sans-serif";
+                        ctx.fillStyle = '#94a3b8';
+                        ctx.fillText('32㎡ · 3개 병원', x, y - 9);
+                    } else {
+                        // Other pharmacies
+                        ctx.beginPath();
+                        ctx.arc(x, y, pharmacy.size || 3, 0, Math.PI * 2);
+                        ctx.fillStyle = pharmacy.color;
+                        ctx.globalAlpha = 0.5;
+                        ctx.fill();
+                        ctx.globalAlpha = 1;
+                    }
+                });
+            };
+
+            // Render Legend (규모별)
+            const renderLegend = () => {
+                const legendEl = document.getElementById('topologyLegend');
+                if (!legendEl) return;
+
+                const legendItems = [
+                    { color: '#8B5CF6', name: '소형 (20㎡ 미만)' },
+                    { color: '#3B82F6', name: '중형 (20-50㎡)' },
+                    { color: '#10B981', name: '대형 (50㎡ 이상)' }
+                ];
+
+                legendEl.innerHTML = legendItems.map(item => `
+                    <div class="topology-legend-item">
+                        <span class="topology-legend-dot" style="background-color: ${item.color}"></span>
+                        <span>${item.name}</span>
+                    </div>
+                `).join('');
+            };
+
+            // Render Same Building Info (동일 건물 의료기관)
+            const renderSameBuildingInfo = () => {
+                const sameBuildingEl = document.getElementById('sameBuildingInfo');
+                const nearbyEl = document.getElementById('nearbyHospitalsInfo');
+                
+                if (sameBuildingEl && MY_PHARMACY.nearby.sameBuilding) {
+                    sameBuildingEl.innerHTML = MY_PHARMACY.nearby.sameBuilding.map(h => `
+                        <div class="flex items-center gap-2 text-[11px]">
+                            <i class="fa-solid ${h.type === '피부과' ? 'fa-spa' : 'fa-tooth'} text-fuchsia-400 w-4"></i>
+                            <span class="text-white font-bold">${h.name}</span>
+                        </div>
+                        <div class="ml-6 text-[10px] text-slate-400">
+                            ${h.depts.map(d => `<span class="inline-block px-1.5 py-0.5 bg-slate-600 rounded mr-1 mb-1">${d}</span>`).join('')}
+                        </div>
+                    `).join('');
+                }
+                
+                if (nearbyEl && MY_PHARMACY.nearby.nearbyHospitals) {
+                    nearbyEl.innerHTML = MY_PHARMACY.nearby.nearbyHospitals.map(h => `
+                        <div class="flex items-center gap-2 text-[11px]">
+                            <i class="fa-solid fa-hospital text-amber-400 w-4"></i>
+                            <span class="text-white">${h.name}</span>
+                            <span class="text-[10px] text-slate-500">${h.distance}m</span>
+                        </div>
+                    `).join('');
+                }
+            };
+
+            // Render Peer Group Ranking (2단 구조: 입지 기반 + 매입 준비중)
+            const renderPeerRanking = () => {
+                const rankingEl = document.getElementById('peerGroupRanking');
+                const countEl = document.getElementById('highMembershipCount');
+                if (!rankingEl) return;
+
+                // 입지 기반 스코어만 사용 (상위 5개)
+                const sortedScores = Object.entries(MY_PHARMACY.locationScores)
+                    .filter(([, score]) => score > 0)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5);
+
+                const highCount = sortedScores.filter(([, score]) => score >= 50).length;
+                if (countEl) countEl.textContent = highCount;
+
+                // 입지 기반 랭킹
+                let html = `
+                    <div class="text-[10px] text-emerald-400 font-bold mb-2 flex items-center gap-1">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        입지 기반 분석 (전국 약국 온톨로지)
+                    </div>
+                `;
+
+                html += sortedScores.map(([groupId, score]) => {
+                    const group = PEER_GROUPS[groupId];
+                    if (!group) return '';
+
+                    const isHigh = score >= 50;
+                    return `
+                        <div class="peer-ranking-bar">
+                            <div class="peer-ranking-icon" style="background-color: ${group.color}20; color: ${group.color}">
+                                <i class="fa-solid ${group.icon}"></i>
+                            </div>
+                            <div class="peer-ranking-info">
+                                <div class="peer-ranking-name">${group.name}</div>
+                                <div class="peer-ranking-track">
+                                    <div class="peer-ranking-fill" style="width: ${score}%; background-color: ${group.color}"></div>
+                                </div>
+                            </div>
+                            <div class="peer-ranking-score" style="color: ${isHigh ? group.color : '#64748b'}">${score}%</div>
+                        </div>
+                    `;
+                }).join('');
+
+                // 매입 기반 (수집 중) 안내
+                html += `
+                    <div class="mt-4 pt-3 border-t border-slate-700">
+                        <div class="text-[10px] text-amber-400 font-bold mb-2 flex items-center gap-1">
+                            <i class="fa-solid fa-chart-pie"></i>
+                            매입 기반 분석 (데이터 수집 중)
+                        </div>
+                        <div class="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
+                            <div class="flex items-center gap-2 mb-2">
+                                <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
+                                    <i class="fa-solid fa-hourglass-half text-amber-400 text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[11px] text-slate-300 font-bold">현재 ${MY_PHARMACY.purchaseData.monthsCollected}개월 데이터 수집 완료</p>
+                                    <p class="text-[10px] text-slate-500">6개월 이상 누적 시 정밀 분석 제공</p>
+                                </div>
+                            </div>
+                            <div class="text-[10px] text-slate-400">
+                                <span class="text-slate-500">예상 유사그룹:</span>
+                                ${MY_PHARMACY.purchaseData.expectedGroups.map(g => 
+                                    `<span class="inline-block px-1.5 py-0.5 bg-slate-700 rounded text-slate-300 ml-1">${g}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                rankingEl.innerHTML = html;
+            };
+
+            // Render Profile Radar Chart (입지 기반 5축)
+            const renderRadarChart = () => {
+                const canvas = document.getElementById('profileRadarChart');
+                if (!canvas) return;
+
+                const labels = ['약국 규모', '의료 밀집도', '진료과 다양성', '전문의 집중도', '내과 비중'];
+                const myData = [
+                    MY_PHARMACY.profile.storeSize,
+                    MY_PHARMACY.profile.medicalDensity,
+                    MY_PHARMACY.profile.deptDiversity,
+                    MY_PHARMACY.profile.specialistConc,
+                    MY_PHARMACY.profile.internalRatio
+                ];
+                const avgData = [
+                    AVG_PROFILE.storeSize,
+                    AVG_PROFILE.medicalDensity,
+                    AVG_PROFILE.deptDiversity,
+                    AVG_PROFILE.specialistConc,
+                    AVG_PROFILE.internalRatio
+                ];
+
+                window.__pharmxaiCharts['profileRadarChart'] = new Chart(canvas, {
+                    type: 'radar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: '내 약국',
+                                data: myData,
+                                borderColor: '#10B981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                                borderWidth: 2,
+                                pointBackgroundColor: '#10B981',
+                                pointRadius: 3
+                            },
+                            {
+                                label: '전국 평균',
+                                data: avgData,
+                                borderColor: '#3B82F6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                borderWidth: 1,
+                                borderDash: [4, 4],
+                                pointBackgroundColor: '#3B82F6',
+                                pointRadius: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    stepSize: 25,
+                                    display: false
+                                },
+                                grid: {
+                                    color: 'rgba(71, 85, 105, 0.3)'
+                                },
+                                angleLines: {
+                                    color: 'rgba(71, 85, 105, 0.3)'
+                                },
+                                pointLabels: {
+                                    color: '#94a3b8',
+                                    font: {
+                                        size: 9,
+                                        family: "'Noto Sans KR', sans-serif"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+
+            // === Helper: Render Benchmark Section (매입 기반) ===
+            const renderBenchmarkSection = (group, isCollecting) => {
+                if (!group.benchmark) return '';
+                
+                if (isCollecting) {
+                    // 데이터 수집 중 - 미리보기 UI
+                    return `
+                        <!--
+                        <div class="benchmark-preview">
+                            <div class="benchmark-preview-title">
+                                <i class="fa-solid fa-chart-column mr-1"></i>
+                                유사그룹 내 매입 포지션 분석
+                            </div>
+                            <div class="benchmark-preview-desc">
+                                현재 ${MY_PHARMACY.purchaseData.monthsCollected}개월 데이터 수집 완료<br>
+                                6개월 이상 누적 시 상위 약국 대비 매입 Gap 분석 제공
+                            </div>
+                            <div class="benchmark-preview-insight">
+                                "같은 입지 상위 약국 대비 OTC/건기식 매입 Gap: ???만원"
+                            </div>
+                        </div>
+                        -->
+                    `;
+                }
+                
+                const { etc, otcHealth } = group.benchmark;
+                const etcGap = etc.myPharmacy - etc.peerAvg;
+                
+                return `
+                    <div class="mb-3">
+                        <p class="text-[10px] text-slate-500 mb-2 flex items-center gap-1">
+                            <i class="fa-solid fa-chart-column text-fuchsia-400"></i>
+                            유사그룹 내 매입 포지션 (월 매입액, 만원)
+                        </p>
+                        <table class="benchmark-table">
+                            <thead>
+                                <tr>
+                                    <th>구분</th>
+                                    <th>피어평균</th>
+                                    <th>상위10%</th>
+                                    <th>내 약국</th>
+                                    <th>Gap</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="row-label">${etc.label}</td>
+                                    <td>${etc.peerAvg.toLocaleString()}</td>
+                                    <td>${etc.peerTop10.toLocaleString()}</td>
+                                    <td class="highlight-cell">${etc.myPharmacy.toLocaleString()}</td>
+                                    <td class="${etcGap >= 0 ? 'gap-positive' : 'gap-negative'}">
+                                        ${etcGap >= 0 ? '▲' : '▼'}${Math.abs(etcGap)}
+                                    </td>
+                                </tr>
+                                <tr class="row-emphasis">
+                                    <td class="row-label">${otcHealth.label}</td>
+                                    <td>${otcHealth.peerAvg.toLocaleString()}</td>
+                                    <td class="highlight-cell" style="color: #10b981">${otcHealth.peerTop10.toLocaleString()}</td>
+                                    <td class="highlight-cell" style="color: #fbbf24">${otcHealth.myPharmacy.toLocaleString()}</td>
+                                    <td class="gap-negative" style="font-weight: 800">
+                                        ▼${Math.abs(otcHealth.gapVsTop)} <i class="fa-solid fa-fire text-[8px]"></i>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="text-[10px] text-center py-2 px-3 bg-slate-800 rounded-lg border border-slate-700">
+                            <i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i>
+                            <span class="text-slate-400">같은 입지 상위 약국은 OTC/건기식을</span>
+                            <strong class="text-fuchsia-400 mx-1">월 ${Math.abs(otcHealth.gapVsTop).toLocaleString()}만원 더 매입</strong>
+                            <span class="text-slate-400">하고 있습니다</span>
+                        </div>
+                        <p class="text-[9px] text-slate-500 text-center mt-1">
+                            <i class="fa-solid fa-arrow-right mr-1"></i>
+                            추천 판매가 활발한 것으로 추정됩니다
+                        </p>
+                    </div>
+                `;
+            };
+
+            // === Helper: Render Top Performer Patterns (매입 구성 기반) ===
+            const renderTopPerformerPatterns = (group) => {
+                if (!group.topPerformerPatterns || group.topPerformerPatterns.length === 0) return '';
+                
+                return `
+                    <div class="mb-3">
+                        <p class="text-[10px] text-slate-500 mb-2 flex items-center gap-1">
+                            <i class="fa-solid fa-boxes-stacked text-amber-400"></i>
+                            상위 약국 매입 구성 특성
+                        </p>
+                        ${group.topPerformerPatterns.map((p, idx) => {
+                            let badgeClass = 'pattern-badge-not-applied';
+                            let badgeText = '미달';
+                            if (p.applied === true) {
+                                badgeClass = 'pattern-badge-applied';
+                                badgeText = '충족';
+                            } else if (p.applied === 'partial') {
+                                badgeClass = 'pattern-badge-partial';
+                                badgeText = '근접';
+                            }
+                            
+                            return `
+                                <div class="pattern-item">
+                                    <div class="pattern-rank">${idx + 1}</div>
+                                    <div class="pattern-info">
+                                        <div class="pattern-name">${p.category} 매입 비중</div>
+                                        <div class="pattern-stats">
+                                            상위 <strong>${p.topAvgRatio}%</strong> vs 내 약국 <strong>${p.myRatio}%</strong>
+                                            <span class="text-red-400 ml-1">[${p.gapPercent}%p]</span>
+                                        </div>
+                                        <div class="text-[9px] text-slate-500 mt-0.5">
+                                            <i class="fa-solid fa-arrow-right mr-1"></i>${p.insight}
+                                        </div>
+                                    </div>
+                                    <span class="pattern-badge ${badgeClass}">${badgeText}</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            };
+
+            // === Helper: Render Top OTC Categories (상위 약국 OTC 카테고리 분석) ===
+            const renderTopOtcCategories = (group) => {
+                if (!group.topOtcCategories || group.topOtcCategories.length === 0) return '';
+                
+                // 우선순위 높은 카테고리 (gap이 큰 것) 찾기
+                const highPriorityCategories = group.topOtcCategories
+                    .filter(c => c.priority === 'high')
+                    .map(c => c.name);
+                
+                return `
+                    <div class="category-analysis-section">
+                        <div class="category-analysis-header">
+                            <i class="fa-solid fa-tablets text-blue-400"></i>
+                            상위 약국 OTC 카테고리 특성
+                        </div>
+                        <div class="category-table-header">
+                            <span>카테고리</span>
+                            <span>상위평균</span>
+                            <span>내 약국</span>
+                            <span>Gap</span>
+                        </div>
+                        ${group.topOtcCategories.map(cat => {
+                            const gapClass = cat.gap < 0 ? 'negative' : 'positive';
+                            const gapText = cat.gap >= 0 ? `+${cat.gap}%p` : `${cat.gap}%p`;
+                            
+                            return `
+                                <div class="category-row">
+                                    <div class="category-name">
+                                        <i class="fa-solid ${cat.icon}" style="color: ${cat.priority === 'high' ? '#3b82f6' : '#64748b'}"></i>
+                                        ${cat.name}
+                                    </div>
+                                    <div class="category-value top-value">${cat.topAvgRatio}%</div>
+                                    <div class="category-value my-value">${cat.myRatio}%</div>
+                                    <div class="category-gap ${gapClass}">${gapText}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                        ${highPriorityCategories.length > 0 ? `
+                            <div class="category-insight-box">
+                                <p>
+                                    <i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i>
+                                    상위 약국은 <strong>${highPriorityCategories.join(', ')}</strong> 카테고리 매입 비중이 높음
+                                    <i class="fa-solid fa-arrow-right mx-1 text-slate-500"></i>
+                                    처방 연계 추천 판매 활성화 추정
+                                </p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            };
+
+            // === Helper: Render Top Health Categories (상위 약국 건기식 카테고리 분석) ===
+            const renderTopHealthCategories = (group) => {
+                if (!group.topHealthCategories || group.topHealthCategories.length === 0) return '';
+                
+                // 우선순위 높은 카테고리 (gap이 큰 것) 찾기
+                const highPriorityCategories = group.topHealthCategories
+                    .filter(c => c.priority === 'high')
+                    .map(c => c.name);
+                
+                return `
+                    <div class="category-analysis-section">
+                        <div class="category-analysis-header">
+                            <i class="fa-solid fa-leaf text-green-400"></i>
+                            상위 약국 건기식 카테고리 특성
+                        </div>
+                        <div class="category-table-header">
+                            <span>카테고리</span>
+                            <span>상위평균</span>
+                            <span>내 약국</span>
+                            <span>Gap</span>
+                        </div>
+                        ${group.topHealthCategories.map(cat => {
+                            const gapClass = cat.gap < 0 ? 'negative' : 'positive';
+                            const gapText = cat.gap >= 0 ? `+${cat.gap}%p` : `${cat.gap}%p`;
+                            
+                            return `
+                                <div class="category-row">
+                                    <div class="category-name">
+                                        <i class="fa-solid ${cat.icon}" style="color: ${cat.priority === 'high' ? '#22c55e' : '#64748b'}"></i>
+                                        ${cat.name}
+                                    </div>
+                                    <div class="category-value top-value">${cat.topAvgRatio}%</div>
+                                    <div class="category-value my-value">${cat.myRatio}%</div>
+                                    <div class="category-gap ${gapClass}">${gapText}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                        ${highPriorityCategories.length > 0 ? `
+                            <div class="category-insight-box">
+                                <p>
+                                    <i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i>
+                                    상위 약국은 <strong>${highPriorityCategories.join(', ')}</strong> 건기식 비중이 높음
+                                    <i class="fa-solid fa-arrow-right mx-1 text-slate-500"></i>
+                                    타겟 고객 맞춤 상담 판매 추정
+                                </p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            };
+
+            // === Helper: Render Common Patterns (상위 약국 공통 성공 패턴) ===
+            // === Helper: Render Pattern-Based Strategies (상위 약국 패턴 기반 추천 전략) ===
+            const renderCommonPatterns = (group) => {
+                if (!group.topPerformerCommonPatterns || group.topPerformerCommonPatterns.length === 0) return '';
+                
+                return `
+                    <div class="pattern-strategy-section">
+                        <div class="pattern-strategy-header">
+                            <i class="fa-solid fa-bullseye"></i>
+                            상위 약국 패턴 기반 추천 전략
+                        </div>
+                        ${group.topPerformerCommonPatterns.map(pattern => `
+                            <div class="pattern-strategy-card">
+                                <div class="pattern-card-header">
+                                    <div class="pattern-card-icon">
+                                        <i class="fa-solid ${pattern.icon}"></i>
+                                    </div>
+                                    <div class="pattern-card-info">
+                                        <div class="pattern-card-title">${pattern.pattern}</div>
+                                        <div class="pattern-card-gap">
+                                            상위 약국 ${pattern.conversionRate}% vs 내 약국 ${pattern.myExecutionRate}% 
+                                            <span class="gap-value">[Gap ${pattern.gapRate}%p]</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="pattern-strategies-list">
+                                    ${pattern.strategies ? pattern.strategies.map(strategy => `
+                                        <div class="strategy-item">
+                                            <div class="strategy-target-icon">
+                                                <i class="fa-solid ${strategy.targetIcon}"></i>
+                                            </div>
+                                            <div class="strategy-content">
+                                                <div class="strategy-target-name">${strategy.target}</div>
+                                                <div class="strategy-items">
+                                                    ${strategy.recommendedItems.map(item => `<span>${item}</span>`).join('')}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('') : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            };
+
+            // === Helper: Render Portfolio Strategy (매입 포트폴리오 기반) ===
+            const renderGapStrategy = (group) => {
+                if (!group.strategies || group.strategies.length === 0) return '';
+                
+                // 첫 번째 (우선순위 높은) 전략만 표시
+                const strategy = group.strategies[0];
+                
+                const difficultyClass = strategy.difficulty === 'easy' ? 'strategy-difficulty-easy' :
+                                        strategy.difficulty === 'medium' ? 'strategy-difficulty-medium' :
+                                        'strategy-difficulty-hard';
+                const difficultyText = strategy.difficulty === 'easy' ? '쉬움' :
+                                       strategy.difficulty === 'medium' ? '보통' : '어려움';
+                
+                return `
+                    <div class="strategy-card">
+                        <div class="strategy-card-header">
+                            <div class="strategy-card-icon">
+                                <i class="fa-solid ${strategy.icon}"></i>
+                            </div>
+                            <div class="strategy-card-title">${strategy.title}</div>
+                            ${strategy.priority === 'high' ? '<span class="strategy-priority">우선</span>' : ''}
+                        </div>
+                        
+                        <div class="strategy-gap-info">
+                            <span class="strategy-gap-label">현재 비중</span>
+                            <span class="strategy-gap-value">${strategy.currentRatio}%</span>
+                            <i class="fa-solid fa-arrow-right strategy-gap-arrow"></i>
+                            <span class="strategy-gap-label">목표 비중</span>
+                            <span class="strategy-recovery-value">${strategy.targetRatio}%</span>
+                            <span class="text-[9px] text-slate-500">(상위 평균)</span>
+                        </div>
+                        
+                        <div class="action-checklist">
+                            ${strategy.actionItems.map(item => `
+                                <div class="action-checklist-item">
+                                    <i class="fa-solid fa-square-check"></i>
+                                    <span>${item}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="text-[10px] text-center py-2 px-3 bg-slate-800/50 rounded-lg mb-2">
+                            <span class="text-slate-400">예상 매입 증가:</span>
+                            <strong class="text-emerald-400 ml-1">${strategy.expectedPurchaseIncrease}</strong>
+                        </div>
+                        
+                        <div class="strategy-footer">
+                            <span class="text-[9px] text-slate-500">
+                                <i class="fa-solid fa-lightbulb mr-1 text-amber-400"></i>
+                                ${strategy.insight}
+                            </span>
+                            <span class="strategy-difficulty ${difficultyClass}">${difficultyText}</span>
+                        </div>
+                    </div>
+                `;
+            };
+
+            // Render Insight Cards (3단 구조: 포지션/패턴/전략)
+            const renderInsightCards = () => {
+                const insightsEl = document.getElementById('peerGroupInsights');
+                if (!insightsEl) return;
+
+                const topGroups = Object.entries(MY_PHARMACY.locationScores)
+                    .filter(([, score]) => score > 0)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 2);
+
+                const isCollecting = MY_PHARMACY.purchaseData.status === 'collecting';
+
+                insightsEl.innerHTML = topGroups.map(([groupId, score]) => {
+                    const group = PEER_GROUPS[groupId];
+                    if (!group) return '';
+
+                    // 희소 유사그룹 판단 (5% 미만)
+                    const isRare = group.nationalRatio < 5;
+                    const rareBadge = isRare ? `
+                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-fuchsia-500/20 text-fuchsia-400 font-bold">
+                            <i class="fa-solid fa-gem mr-0.5"></i>희소 입지 · 상위 ${group.nationalRatio}%
+                        </span>
+                    ` : '';
+                    
+                    // 추정 약국 수
+                    const estimatedCount = group.estimatedCount || Math.round(25000 * group.nationalRatio / 100);
+
+                    return `
+                        <div class="insight-card" style="border-color: ${group.color}">
+                            <div class="insight-card-header">
+                                <div class="insight-card-icon" style="background-color: ${group.color}20; color: ${group.color}">
+                                    <i class="fa-solid ${group.icon}"></i>
+                                </div>
+                                <span class="insight-card-title">${group.name}</span>
+                                <span class="insight-card-score" style="background-color: ${group.color}20; color: ${group.color}">${score}%</span>
+                            </div>
+                            ${isRare ? `<div class="mb-2">${rareBadge}</div>` : ''}
+                            <p class="text-[10px] text-slate-400 mb-2">${group.description}</p>
+                            <p class="text-[9px] text-slate-500 mb-3">
+                                <i class="fa-solid fa-users mr-1"></i>전국 ${estimatedCount.toLocaleString()}개 약국
+                            </p>
+                            
+                            ${renderBenchmarkSection(group, isCollecting)}
+                            ${renderTopOtcCategories(group)}
+                            ${renderTopHealthCategories(group)}
+                            ${renderTopPerformerPatterns(group)}
+                            ${renderCommonPatterns(group)}
+                            ${renderGapStrategy(group)}
+                        </div>
+                    `;
+                }).join('');
+            };
+
+            // Initialize all
+            const init = () => {
+                renderTopologyMap();
+                renderLegend();
+                renderSameBuildingInfo();
+                renderPeerRanking();
+                renderRadarChart();
+                renderInsightCards();
+
+                // Handle resize
+                let resizeTimeout;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimeout);
+                    resizeTimeout = setTimeout(renderTopologyMap, 200);
+                });
+            };
+
+            // Run when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
 
         // --- Mobile Tabs (ETC / OTC / Health) ---
         (function initReportMobileTabs() {
